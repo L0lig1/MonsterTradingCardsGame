@@ -29,7 +29,7 @@ namespace MonsterTradingCardsGame.CardNamespace
 
         public void PrintCard()
         {
-            Console.WriteLine($"{Name}, {ElementType}, {Damage}\n");
+            Console.WriteLine($"{Name}, {ElementType}, {Damage}");
         }
         public string Name   // property
         {

@@ -6,21 +6,36 @@ using System.Net;
 using System.Text.Json;
 using System.IO;
 using System.Threading.Tasks;
-using CardInterface;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using MonsterTradingCardsGame.Stack;
+using MonsterTradingCardsGame.StoreNamespace;
+using MonsterTradingCardsGame;
+using MonsterTradingCardsGame.Game;
+using user;
 
 namespace HelloWorld
 {
     class Program
     {
-        static async Task Main(string[] args)
+        public static void Main(String[] args)
         {
-            
-            var stack = new Stack();
-            stack.CreateRandomStack();
-            stack.PrintStack();
+            var user1 = new User();
+            var store = new Store();
+            var package = store.BuyPackage(user1.Coins);
+            if (package != null)
+            {
+                user1.AddPackageToStack(package);
+            }
+            user1.PrintStack();
+            var user2 = new User();
+            package = store.BuyPackage(user2.Coins);
+            if (package != null)
+            {
+                user2.AddPackageToStack(package);
+            }
+            user1.PrintStack();
+            Battle battle = new(user1, user2);
+            battle.createDecks();
         }
         
     }
