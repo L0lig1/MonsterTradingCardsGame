@@ -4,15 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MonsterTradingCardsGame;
+using MonsterTradingCardsGame.CardNamespace;
 
 
-namespace MonsterTradingCardsGame.Card
+namespace MonsterTradingCardsGame.CardNamespace
 {
     internal class Card
     {
-        public Card()
+        public Card(string name, int damage, int elementType)
         {
-
+            Name = name;
+            Damage = damage;
+            ElementType = elementType;
         }
 
 
@@ -24,7 +27,10 @@ namespace MonsterTradingCardsGame.Card
         private int _cardType;
 
 
-
+        public void PrintCard()
+        {
+            Console.WriteLine($"{Name}, {ElementType}, {Damage}\n");
+        }
         public string Name   // property
         {
             get => name;         // get method
@@ -38,14 +44,14 @@ namespace MonsterTradingCardsGame.Card
             {
                 switch (value)
                 {
-                    case 1: // Feuer
-                        _elementType = 1;
+                    case 1: 
+                        _elementType = (int)ElementTypeEnum.Fire;
                         break;
-                    case 2: // Wasser
-                        _elementType = 2;
+                    case 2: 
+                        _elementType = (int)ElementTypeEnum.Normal;
                         break;
-                    case 3: // Normal
-                        _elementType = 3;
+                    case 3: 
+                        _elementType = (int)ElementTypeEnum.Water;
                         break;
                     default:
                         Console.WriteLine("Ungueltig");

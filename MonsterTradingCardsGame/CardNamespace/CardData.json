@@ -1,6 +1,6 @@
 ﻿{
-  // FIRE
-  "fire": [
+  // fire
+  "1": [
     [
       {
         "name": "ember",
@@ -33,7 +33,8 @@
     ]
   ],
 
-  "normal": [
+  // normal
+  "2": [
     [
       {
         "name": "explosion",
@@ -66,7 +67,8 @@
     ]
   ],
 
-  "water": [
+  // water
+  "3": [
     [
       {
         "name": "water gun",

@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CardInterface;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using MonsterTradingCardsGame.Stack;
 
 namespace HelloWorld
 {
@@ -16,13 +17,10 @@ namespace HelloWorld
     {
         static async Task Main(string[] args)
         {
-            ReadJsonFile("C:\\Users\\Nahash\\source\\repos\\MonsterTradingCardsGame\\MonsterTradingCardsGame\\Card\\CardData.json");
-        }
-        public static void ReadJsonFile(string jsonFileIn)
-        {
-            dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
             
-            Console.WriteLine(jsonFile["fire"][0][0]["name"]);
+            var stack = new Stack();
+            stack.CreateRandomStack();
+            stack.PrintStack();
         }
         
     }
