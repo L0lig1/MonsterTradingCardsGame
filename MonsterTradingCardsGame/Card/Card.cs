@@ -3,17 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MonsterTradingCardsGame;
 
 
-namespace CardInterface
+namespace MonsterTradingCardsGame.Card
 {
     internal class Card
     {
+        public Card()
+        {
 
+        }
+
+
+
+        Random _rnd = new Random();
         public string name;
         private int _damage;
-        private int elementType;
-        private int cardType;
+        private int _elementType;
+        private int _cardType;
 
 
 
@@ -25,19 +33,19 @@ namespace CardInterface
         
         public int ElementType   // property
         {
-            get => elementType;         // get method
+            get => _elementType;         // get method
             set
             {
                 switch (value)
                 {
                     case 1: // Feuer
-                        elementType = 1;
+                        _elementType = 1;
                         break;
                     case 2: // Wasser
-                        elementType = 2;
+                        _elementType = 2;
                         break;
                     case 3: // Normal
-                        elementType = 3;
+                        _elementType = 3;
                         break;
                     default:
                         Console.WriteLine("Ungueltig");
@@ -45,5 +53,8 @@ namespace CardInterface
                 }
             } 
         }
+
+        public int Damage
+        { get => _damage; set => _damage = value; }
     }
 }

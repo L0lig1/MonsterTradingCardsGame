@@ -1,0 +1,102 @@
+﻿{
+  // FIRE
+  "fire": [
+    [
+      {
+        "name": "ember",
+        "damage": 25
+      }
+    ],
+    [
+      {
+        "name": "fire blast",
+        "damage": 120
+      }
+    ],
+    [
+      {
+        "name": "fire spin",
+        "damage": 35
+      }
+    ],
+    [
+      {
+        "name": "fire punch",
+        "damage": 75
+      }
+    ],
+    [
+      {
+        "name": "flamethrower",
+        "damage": 95
+      }
+    ]
+  ],
+
+  "normal": [
+    [
+      {
+        "name": "explosion",
+        "damage": 150
+      }
+    ],
+    [
+      {
+        "name": "dizzy punch",
+        "damage": 70
+      }
+    ],
+    [
+      {
+        "name": "double slap",
+        "damage": 15
+      }
+    ],
+    [
+      {
+        "name": "double team",
+        "damage": 70
+      }
+    ],
+    [
+      {
+        "name": "double-edge",
+        "damage": 100
+      }
+    ]
+  ],
+
+  "water": [
+    [
+      {
+        "name": "water gun",
+        "damage": 40
+      }
+    ],
+    [
+      {
+        "name": "waterfall",
+        "damage": 80
+      }
+    ],
+    [
+      {
+        "name": "hydro pump",
+        "damage": 120
+      }
+    ],
+    [
+      {
+        "name": "bubble beam",
+        "damage": 65
+      }
+    ],
+    [
+      {
+        "name": "bubble",
+        "damage": 20
+      }
+    ]
+  ]
+}
+
