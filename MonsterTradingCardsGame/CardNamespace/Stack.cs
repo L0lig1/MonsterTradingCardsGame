@@ -10,14 +10,14 @@ namespace MonsterTradingCardsGame.CardNamespace
 {
     internal class Stack : IEnumerable
     {
-        private List<Card> _stack = new List<Card>();
+        private List<Card> _stack = new();
         public void PrintStack()
         {
             var counter = 1;
             foreach (var card in _stack)
             {
-                Console.WriteLine($"Card {counter++}:");
-                card.PrintCard();
+                Console.Write($"Card {counter++}: ");
+                Console.WriteLine(card.PrintCard());
             }
         }
 
@@ -48,7 +48,6 @@ namespace MonsterTradingCardsGame.CardNamespace
 
         public Card ReturnCard(int index)
         {
-            //var index = _stack.FindIndex(x => x.Name == name);
             if (index >= 0 || index < _stack.Count)
             {
                 return _stack[index];

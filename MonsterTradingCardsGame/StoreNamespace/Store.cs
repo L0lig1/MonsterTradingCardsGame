@@ -9,11 +9,13 @@ using MonsterTradingCardsGame.CardNamespace;
 using user;
 
 
+
 namespace MonsterTradingCardsGame.StoreNamespace
 {
     internal class Store
     {
         private List<Package> _packages = new List<Package>();
+        public bool AUTOMATICGAME = true;
 
         public Store()
         {
@@ -36,37 +38,23 @@ namespace MonsterTradingCardsGame.StoreNamespace
         
         public Package BuyPackage(int coins)
         {
-
+            Console.WriteLine("\nWelcome to the store!\nHere are some packages you could buy");
             if (coins >= 5)
             {
                 PrintPackages();
+                var rand = new Random();
                 var packageChoice = 8;
-                while (packageChoice is > 4 or < 0)
+                while (packageChoice is > 5 or < 1)
                 {
-                    Console.WriteLine("Choose a package\n");
-                    packageChoice = int.Parse(Console.ReadLine() ?? throw new InvalidOperationException());
+                    Console.WriteLine("Choose a package");
+                    packageChoice = AUTOMATICGAME ? rand.Next(1,5) : int.Parse(Console.ReadLine() ?? throw new InvalidOperationException());
+                    //packageChoice = rand.Next(1,5);
                 }
 
-                Console.WriteLine($"You chose {packageChoice}\n");
-
-                var choice = "";
-                while (choice is not ("Y" or "N"))
-                {
-                    Console.WriteLine("You have enough coins. Confirm purchase: (Y|N)\n");
-                    choice = Console.ReadLine();
-                }
-                switch (choice)
-                {
-                    case "Y":
-                        Console.WriteLine("Purchase successful!\n");
-                        return _packages[packageChoice];
-                    case "N":
-                        Console.WriteLine("Purchase canceled!\n");
-                        return null;
-                    default:
-                        Console.WriteLine("Unexpected error\n");
-                        return null;
-                }
+                Console.WriteLine($"\nYou chose {packageChoice}");
+                Console.WriteLine("Purchase successful!");
+                return _packages[packageChoice-1];
+                
             }
             Console.WriteLine($"Not enough coins! You have {coins} and you need to have 5");
             return null;
@@ -75,13 +63,12 @@ namespace MonsterTradingCardsGame.StoreNamespace
 
         public void PrintPackages()
         {
-            var count = 0;
+            var count = 1;
             foreach (var package in _packages)
             {
                 Console.WriteLine($"\nPackage nr {count++}");
                 package.PrintPackage();
             }
-            
         }
     }
 }

@@ -3,46 +3,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using MonsterTradingCardsGame.ParseJSON;
 
 namespace MonsterTradingCardsGame.CardNamespace
 {
-    internal class Deck
+    public class Deck
     {
         private List<Card> _deck = new();
 
-
+        public Card ReturnDeckAtIndex(int index)
+        {
+            if (index <= _deck.Count && index >= 0 && _deck.Count > 0)
+            {
+                return _deck[index];
+            }
+            return null;
+        }
 
         public void CreateRandomDeck()
         {
-            var jsonFileIn = "C:\\Users\\Nahash\\source\\repos\\MonsterTradingCardsGame\\MonsterTradingCardsGame\\CardNamespace\\CardData.json";
-            dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
+            var json = new JSON();
             for (int i = 0; i < 4; i++)
             {
-                var rand = new Random();
-                var cardType = rand.Next((int)ElementTypeEnum.Fire, (int)ElementTypeEnum.Water + 1);
-                var card = jsonFile[cardType.ToString()][rand.Next(0, 4)];
-                _deck.Add(new Card((string)card[0]["name"], (int)card[0]["damage"], cardType));
+                _deck.Add(json.GetRandomCard());
             }
             Console.WriteLine("Deck created!");
         }
 
         public void CreateCustomDeck(List<Card> stack)
         {
-            //var jsonFileIn = "C:\\Users\\Nahash\\source\\repos\\MonsterTradingCardsGame\\MonsterTradingCardsGame\\CardNamespace\\CardData.json";
-            //dynamic jsonFile = JsonConvert.DeserializeObject(File.ReadAllText(jsonFileIn));
-            //List<Card> cards = new();
-            //var cardCount = 1;
-            //for (int i = 1; i <= 3; i++)
-            //{
-            //    for (int j = 0; j < 5; j++)
-            //    {
-            //        var card = jsonFile[i.ToString()][j];
-            //        cards.Add(new Card((string)card[0]["name"], (int)card[0]["damage"], i));
-            //        Console.WriteLine($"Card {cardCount++}: {card[0]["name"]}, i, {card[0]["damage"]}");
-            //    }
-            //}
 
             List<Card> cards = stack;
 
@@ -52,7 +41,7 @@ namespace MonsterTradingCardsGame.CardNamespace
                 foreach (var card in cards)
                 {
                     Console.WriteLine($"Card {count++}:");
-                    card.PrintCard();
+                    Console.WriteLine(card.PrintCard());
                 }
                 var choice = 200;
                 while (choice <= 0 || choice > cards.Count)
@@ -89,21 +78,25 @@ namespace MonsterTradingCardsGame.CardNamespace
             
         }
 
-        
-
         public void PrintDeck()
         {
             foreach (var card in _deck)
             {
-                card.PrintCard();
+                Console.WriteLine(card.PrintCard());
             }
         }
 
+        // sind diese Funktionen notwendig oder deck returnen und diese Sachen ausführen?
         public void AddToDeck(Card card)
         {
             _deck.Add(card);
         }
 
+        public int Length()
+        {
+            return _deck.Count;
+        }
+        
         public void RemoveFromDeck(Card card)
         {
             _deck.Remove(card);

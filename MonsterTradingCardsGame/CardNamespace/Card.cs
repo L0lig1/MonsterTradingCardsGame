@@ -9,48 +9,82 @@ using MonsterTradingCardsGame.CardNamespace;
 
 namespace MonsterTradingCardsGame.CardNamespace
 {
-    internal class Card
+    public class Card
     {
-        public Card(string name, int damage, int elementType)
-        {
-            Name = name;
-            Damage = damage;
-            ElementType = elementType;
-        }
-
-
-
-        Random _rnd = new Random();
-        public string name;
+        //Random _rnd = new();
         private int _damage;
         private int _elementType;
         private int _cardType;
 
-
-        public void PrintCard()
+        public Card(string name, int damage, int elementType, int cardType)
         {
-            Console.WriteLine($"{Name}, {ElementType}, {Damage}");
+            Name = name;
+            Damage = damage;
+            ElementType = elementType;
+            CardType = cardType;
         }
-        public string Name   // property
+
+        public string PrintCard()
         {
-            get => name;         // get method
-            set => name = value; // set method
+            return $"{Name} ({EnumToStringEt()} type) ({Damage} damage)";
+        }
+
+        public string Name { get; set; }
+
+        public string EnumToStringCt()
+        {
+            return CardType switch
+            {
+                (int)CardTypeEnum.Monster => "Monster",
+                (int)CardTypeEnum.Spell => "Spell",
+                _ => ""
+            };
+        }
+        public string EnumToStringEt()
+        {
+            return ElementType switch
+            {
+                (int)ElementTypeEnum.Fire => "Fire",
+                (int)ElementTypeEnum.Normal => "Normal",
+                (int)ElementTypeEnum.Water => "Water",
+                _ => ""
+            };
         }
         
-        public int ElementType   // property
+        public int CardType   
         {
-            get => _elementType;         // get method
+            get => _cardType;         
             set
             {
                 switch (value)
                 {
-                    case 1: 
+                    case (int)CardTypeEnum.Monster:
+                        _cardType = (int)CardTypeEnum.Monster;
+                        break;
+                    case (int)CardTypeEnum.Spell:
+                        _cardType = (int)CardTypeEnum.Spell;
+                        break;
+                    default:
+                        Console.WriteLine("Ungueltig");
+                        break;
+                }
+            } 
+        }
+        
+        public int ElementType   
+        {
+            get => _elementType;         
+            set
+            {
+                switch (value)
+                {
+                    case (int)ElementTypeEnum.Fire: 
                         _elementType = (int)ElementTypeEnum.Fire;
                         break;
-                    case 2: 
+                    case (int)ElementTypeEnum.Normal: 
                         _elementType = (int)ElementTypeEnum.Normal;
                         break;
-                    case 3: 
+                    case (int)ElementTypeEnum.Water: 
                         _elementType = (int)ElementTypeEnum.Water;
                         break;
                     default:
@@ -61,6 +95,15 @@ namespace MonsterTradingCardsGame.CardNamespace
         }
 
         public int Damage
-        { get => _damage; set => _damage = value; }
+        {
+            get => _damage;
+            set
+            {
+                if (value <= 200 && value > 0)
+                    _damage = value;
+                else
+                    Console.WriteLine("Ungueltig");
+            }
+        }
     }
 }

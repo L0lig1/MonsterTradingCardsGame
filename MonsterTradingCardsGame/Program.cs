@@ -1,43 +1,68 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
-using System.Reflection.Metadata;
-using System;
-using System.Net;
-using System.Text.Json;
-using System.IO;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using MonsterTradingCardsGame.StoreNamespace;
-using MonsterTradingCardsGame;
-using MonsterTradingCardsGame.Game;
 using user;
 
-namespace HelloWorld
+
+// for automatic game (deck creation, battle etc), change AUTOMATIC var in Store and User
+
+namespace MonsterTradingCardsGame
 {
     class Program
     {
         public static void Main(String[] args)
         {
-            var user1 = new User();
+            var user1 = new User("User 1");
+            Package package = null;
             var store = new Store();
-            var package = store.BuyPackage(user1.Coins);
+            var choice = "A";
+
+            Console.WriteLine("Welcome to MonsterTradingCardGame!");
+            while (choice != "X")
+            {
+                Console.WriteLine("(B)attle, (T)rade, (S)tore");
+                choice = Console.ReadLine();
+                switch (choice)
+                {
+                    case "B":
+                        break;
+                    case "S":
+                        package = store.BuyPackage(user1.Coins);
+                        if (package != null)
+                        {
+                            user1.AddPackageToStack(package);
+                        }
+                        user1.PrintStack();
+                        break;
+                    case "T":
+                        break;
+                    case "X":
+                        Console.WriteLine("Thanks for playing MonsterTradingCardGame!");
+                        break;
+                    default: 
+                        Console.WriteLine("Wrong Input");
+                        break;
+                }
+            }
+
+
+            //var package = store.BuyPackage(user1.Coins);
             if (package != null)
             {
                 user1.AddPackageToStack(package);
             }
             user1.PrintStack();
-            var user2 = new User();
+            var user2 = new User("User 2");
             package = store.BuyPackage(user2.Coins);
             if (package != null)
             {
                 user2.AddPackageToStack(package);
             }
-            user1.PrintStack();
-            Battle battle = new(user1, user2);
-            battle.createDecks();
+            user2.PrintStack();
+            Battle.Battle battle = new(user1, user2);
+            battle.CreateDecks();
+            battle.Fight();
         }
-        
     }
 }
 

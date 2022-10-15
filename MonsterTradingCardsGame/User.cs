@@ -8,26 +8,39 @@ using MonsterTradingCardsGame.StoreNamespace;
 
 namespace user
 {
-    class User
+    public class User
     {
-        public string name; 
+        private string name;
         private int _coins = 20;
-        private Deck _deck = new Deck();
-        private Stack _stack = new Stack();
+        public Deck _deck = new();
+        private readonly Stack _stack = new();
+        public bool AUTOMATICGAME = true;
+
+        public User(string name)
+        {
+            this.Name = name;
+        }
 
         public string Name   // property
         {
-            get => name; 
-            set => name = value; 
+            get => name;
+            set => name = value.Length < 25 ? value : "AutoNameCzNameTooLong";
+        }
+
+        public Card ReturnRandomCardFromDeck()
+        {
+            var rand = new Random();
+            return _deck.ReturnDeckAtIndex(rand.Next(0,_deck.Length()));
         }
 
         public void CustomOrRandomDeck()
         {
             var choice = "";
-            while (choice is not "C" or "R")
+            while (choice is not ("C" or "R"))
             {
                 Console.WriteLine("Dou you want to create a (C)ustom deck yourself or get a (R)andom one?");
-                choice = Console.ReadLine();
+                choice = AUTOMATICGAME ? "R" : Console.ReadLine();
+                //choice = "R";
             }
 
             switch (choice)
@@ -42,7 +55,6 @@ namespace user
                     Console.WriteLine("BRUH");
                     break;
             }
-
         }
 
         public int Coins   // property
