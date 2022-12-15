@@ -13,11 +13,10 @@ namespace MonsterTradingCardsGame
         public static void Main(String[] args)
         {
             var server = new Server();
-            string[] bruh = {"afljkn"};
-            //server.Listen(bruh);
-            var db = new DB();
-            db.Connect();
-            db.SelectAll();
+            server.Listen();
+            //var db = new DB();
+            //db.Connect();
+            //db.SelectAll();
 
 
             //var user1 = new User("User 1");

@@ -1,13 +1,18 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Collections.Generic;
+using System;
+
+using MonsterTradingCardsGame.ClientServer;
+
 
 namespace MonsterTradingCardsGame.ClientServer
 {
     internal class Server
     {
-        public void Listen(string[] args)
+        public void Listen()
         {
-            const int port = 8000;
+            const int port = 10001;
             var localAddr = IPAddress.Parse("127.0.0.1");
             TcpListener? server = null;
 
@@ -46,16 +51,19 @@ namespace MonsterTradingCardsGame.ClientServer
                     {
                         // Translate data bytes to a ASCII string.
                         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine($"{data}");
+                        Console.WriteLine($"this: {data}");
 
                         // Process the data sent by the client.
-                        data = data.ToUpper();
+                        var parse = new HttpParser(data);
+                        var handleRequest = new RequestHandler();
+                        handleRequest.HandleRequest(parse);
 
-                        var msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        //data = data.ToUpper();
+
+                        var msg = System.Text.Encoding.ASCII.GetBytes("data");
 
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
-                        Console.WriteLine($"Sent: {data}");
                     }
                 }
             }

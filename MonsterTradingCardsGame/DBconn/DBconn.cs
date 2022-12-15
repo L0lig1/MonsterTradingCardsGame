@@ -26,19 +26,13 @@ namespace MonsterTradingCardsGame.DBconn
 
         public void SelectAll()
         {
-            using var command = new NpgsqlCommand("SELECT * FROM user", Conn);
+            using var command = new NpgsqlCommand("SELECT * FROM user ", Conn);
             var reader = command.ExecuteReader();
             while (reader.Read())
             {
-
                 Console.WriteLine($"Reading from user id: {reader.GetString(0)}");
             }
-            //while (reader.ToString())
-            //{
-            //    Console.WriteLine($"Reading from table=({reader})");
-            //    Console.WriteLine($"Reading from table=({reader["id"]})");
-            //}
-            //reader.Close();
+            reader.Close();
         }
     }
 }
