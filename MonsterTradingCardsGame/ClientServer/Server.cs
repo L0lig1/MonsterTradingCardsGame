@@ -28,7 +28,7 @@ namespace MonsterTradingCardsGame.ClientServer
                 while (true)
                 {
                     Console.Write("Waiting for a connection... ");
-
+                        
                     // Perform a blocking call to accept requests.
                     // You could also use server.AcceptSocket() here.
                     using var client = server.AcceptTcpClient();

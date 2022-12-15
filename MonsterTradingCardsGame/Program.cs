@@ -1,4 +1,5 @@
 ﻿using MonsterTradingCardsGame.ClientServer;
+using MonsterTradingCardsGame.DBconn;
 using MonsterTradingCardsGame.StoreNamespace;
 using user;
 
@@ -13,7 +14,11 @@ namespace MonsterTradingCardsGame
         {
             var server = new Server();
             string[] bruh = {"afljkn"};
-            server.Listen(bruh);
+            //server.Listen(bruh);
+            var db = new DB();
+            db.Connect();
+            db.SelectAll();
+
 
             //var user1 = new User("User 1");
             //var user2 = new User("User 2");
