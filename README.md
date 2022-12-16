@@ -1,7 +1,7 @@
 MonsterTradingCardsGame
 
 TODO:
-- Datenbank Verbindung muss funktionieren
+- DONE Datenbank Verbindung muss funktionieren
 - Threads
 - SQL Injection?
 - Unit Tests

@@ -12,12 +12,14 @@ namespace MonsterTradingCardsGame
     {
         public static void Main(String[] args)
         {
-            var server = new Server();
-            server.Listen();
-            //var db = new DB();
-            //db.Connect();
-            //db.SelectAll();
+            //var server = new Server();
+            //server.Listen();
+            var db = new DB();
+            db.Scoreboard();
+            db.UpdateUserStats("Marcin", -100);
+            db.UserStats("Marcin");
 
+            //db.CreateCard("845f0dc7-37d0-426e-994e-43fc3ac83c08", "WaterGoblin", 10, "Monster", "Water");
 
             //var user1 = new User("User 1");
             //var user2 = new User("User 2");
