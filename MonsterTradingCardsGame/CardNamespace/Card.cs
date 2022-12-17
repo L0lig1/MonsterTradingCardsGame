@@ -13,83 +13,53 @@ namespace MonsterTradingCardsGame.CardNamespace
     {
         //Random _rnd = new();
         private int _damage;
-        private int _elementType;
-        private int _cardType;
+        private string _id;
+        private string _elementType;
+        private string _cardType;
 
-        public Card(string name, int damage, int elementType, int cardType)
+        public Card(string id, string name, int damage, string elementType, string cardType)
         {
+            Id = id;
             Name = name;
             Damage = damage;
-            ElementType = elementType;
-            CardType = cardType;
-        }
-
-        public string PrintCard()
-        {
-            return $"{Name} ({EnumToStringEt()} type) ({Damage} damage)";
+            var rnd = new Random();
+            ElementType = ValidElementTypes[rnd.Next(0, 3)];
+            CardType = ValidElementTypes[rnd.Next(0, 2)];
         }
 
         public string Name { get; set; }
+        public string Id { get; set; }
+        public string[] ValidElementTypes = { "Fire", "Water", "Normal" };
+        public string[] ValidCardTypes = { "Monster", "Spell" };
 
-        public string EnumToStringCt()
-        {
-            return CardType switch
-            {
-                (int)CardTypeEnum.Monster => "Monster",
-                (int)CardTypeEnum.Spell => "Spell",
-                _ => ""
-            };
-        }
-        public string EnumToStringEt()
-        {
-            return ElementType switch
-            {
-                (int)ElementTypeEnum.Fire => "Fire",
-                (int)ElementTypeEnum.Normal => "Normal",
-                (int)ElementTypeEnum.Water => "Water",
-                _ => ""
-            };
-        }
-        
-        public int CardType   
+        public string CardType   
         {
             get => _cardType;         
             set
             {
-                switch (value)
+                if (ValidCardTypes.Any(value.Contains))
                 {
-                    case (int)CardTypeEnum.Monster:
-                        _cardType = (int)CardTypeEnum.Monster;
-                        break;
-                    case (int)CardTypeEnum.Spell:
-                        _cardType = (int)CardTypeEnum.Spell;
-                        break;
-                    default:
-                        Console.WriteLine("Ungueltig");
-                        break;
+                    _elementType = value;
+                } 
+                else
+                {
+                    Console.WriteLine($"Invalid element type. Valid element types: {ValidCardTypes}");
                 }
             } 
         }
         
-        public int ElementType   
+        public string ElementType   
         {
             get => _elementType;         
             set
             {
-                switch (value)
+                if (ValidElementTypes.Any(value.Contains))
                 {
-                    case (int)ElementTypeEnum.Fire: 
-                        _elementType = (int)ElementTypeEnum.Fire;
-                        break;
-                    case (int)ElementTypeEnum.Normal: 
-                        _elementType = (int)ElementTypeEnum.Normal;
-                        break;
-                    case (int)ElementTypeEnum.Water: 
-                        _elementType = (int)ElementTypeEnum.Water;
-                        break;
-                    default:
-                        Console.WriteLine("Ungueltig");
-                        break;
+                    _elementType = value;
+                }
+                else
+                {
+                    Console.WriteLine($"Invalid element type. Valid element types: {ValidElementTypes}");
                 }
             } 
         }
@@ -99,11 +69,16 @@ namespace MonsterTradingCardsGame.CardNamespace
             get => _damage;
             set
             {
-                if (value <= 200 && value > 0)
+                if (value is <= 200 and > 0)
                     _damage = value;
                 else
                     Console.WriteLine("Ungueltig");
             }
+        }
+
+        public string PrintCard()
+        {
+            return $"{Name} ({ElementType} type) ({Damage} damage)";
         }
     }
 }

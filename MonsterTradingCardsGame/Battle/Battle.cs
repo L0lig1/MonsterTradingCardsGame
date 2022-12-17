@@ -40,50 +40,50 @@ namespace MonsterTradingCardsGame.Battle
 
         public static int CalculateDmgElementType(Card attackingCard, Card defendingCard)
         {
-            switch (attackingCard.ElementType)
-            {
-                case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Water:
-                case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
-                case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
-                    return attackingCard.Damage / 2;
-                case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
-                case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
-                case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Water:
-                    return attackingCard.Damage * 2;
-                default:
+            //switch (attackingCard.ElementType)
+            //{
+            //    case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Water:
+            //    case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
+            //    case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
+            //        return attackingCard.Damage / 2;
+            //    case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
+            //    case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
+            //    case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Water:
+            //        return attackingCard.Damage * 2;
+            //    default:
                     return attackingCard.Damage;
-            }
+            //}
         }
 
         public bool KnightVsWater()
         {
-            if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == (int)ElementTypeEnum.Water)
-            {
-                FightResult(_user2, _user2CurrentCard, 0, _user1, _user1CurrentCard, 0, true);
-                return true;
-            }
-            if (_user2CurrentCard.Name == "Knight" && _user1CurrentCard.ElementType == (int)ElementTypeEnum.Water)
-            {
-                FightResult(_user1, _user1CurrentCard, 0, _user2, _user2CurrentCard, 0, true);
-                return true;
-            }
+            //if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == (int)ElementTypeEnum.Water)
+            //{
+            //    FightResult(_user2, _user2CurrentCard, 0, _user1, _user1CurrentCard, 0, true);
+            //    return true;
+            //}
+            //if (_user2CurrentCard.Name == "Knight" && _user1CurrentCard.ElementType == (int)ElementTypeEnum.Water)
+            //{
+            //    FightResult(_user1, _user1CurrentCard, 0, _user2, _user2CurrentCard, 0, true);
+            //    return true;
+            //}
 
             return false;
         }
 
         public int CalculateDamage(Card attackingCard, Card defendingCard)
         {
-            if
-            (
-                (attackingCard.CardType == (int)CardTypeEnum.Monster && defendingCard.CardType == (int)CardTypeEnum.Monster) ||
-                (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
-                (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
-                (defendingCard.Name == "Kraken"  && attackingCard.CardType == (int)CardTypeEnum.Spell) ||
-                (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
-            )
-            {
-                return attackingCard.Damage;
-            }
+            //if
+            //(
+            //    (attackingCard.CardType == (int)CardTypeEnum.Monster && defendingCard.CardType == (int)CardTypeEnum.Monster) ||
+            //    (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
+            //    (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
+            //    (defendingCard.Name == "Kraken"  && attackingCard.CardType == (int)CardTypeEnum.Spell) ||
+            //    (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
+            //)
+            //{
+            //    return attackingCard.Damage;
+            //}
 
             return CalculateDmgElementType(attackingCard, defendingCard);
         }

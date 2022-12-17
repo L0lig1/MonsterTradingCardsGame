@@ -7,12 +7,12 @@ TODO:
 - Unit Tests
 - Fix Response
 - RequestHandler
-    User: (hat Bio und Image btw)
-        user registration
-        user login
-        edit user data
-        stats: 1 user
-        scoreboard: all users
+    User:
+        DONE DONE user registration
+        (Token??) DONE DONE user login
+        DONE edit user data
+        DONE DONE stats: 1 user
+        DONE scoreboard: all users
         state management (tokens unso)
     Packages + Stack:
         create/add packages

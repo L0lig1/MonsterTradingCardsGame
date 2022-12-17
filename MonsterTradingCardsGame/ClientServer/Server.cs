@@ -10,12 +10,11 @@ namespace MonsterTradingCardsGame.ClientServer
 {
     internal class Server
     {
-        public void Listen()
+        public async Task Listen()
         {
             const int port = 10001;
             var localAddr = IPAddress.Parse("127.0.0.1");
-            TcpListener? server = null;
-
+            TcpListener server = null;
             try
             {
 
@@ -26,45 +25,64 @@ namespace MonsterTradingCardsGame.ClientServer
                 server.Start();
 
                 // Buffer for reading data
-                var bytes = new byte[256];
-                string? data = null;
+                Byte[] bytes = new Byte[256];
+                String data = null;
 
                 // Enter the listening loop.
                 while (true)
                 {
                     Console.Write("Waiting for a connection... ");
-                        
+
                     // Perform a blocking call to accept requests.
                     // You could also use server.AcceptSocket() here.
-                    using var client = server.AcceptTcpClient();
+                    using TcpClient client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!");
 
                     data = null;
 
                     // Get a stream object for reading and writing
-                    var stream = client.GetStream();
+                    NetworkStream stream = client.GetStream();
 
                     int i;
+                    var parser = new HttpParser();
 
                     // Loop to receive all the data sent by the client.
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
                         // Translate data bytes to a ASCII string.
-                        data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine($"this: {data}");
-
+                        parser.Request += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                        Console.WriteLine("Received: {0}", data);
+                    
                         // Process the data sent by the client.
-                        var parse = new HttpParser(data);
-                        var handleRequest = new RequestHandler();
-                        handleRequest.HandleRequest(parse);
-
-                        //data = data.ToUpper();
-
-                        var msg = System.Text.Encoding.ASCII.GetBytes("data");
-
+                        parser.ParseData();
+                        var rh = new RequestHandler();
+                        var response = rh.HandleRequest(parser);
+                        
+                        byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                        
                         // Send back a response.
                         stream.Write(msg, 0, msg.Length);
+                        Console.WriteLine("Sent: {0}", data);
                     }
+
+                    //// Loop to receive all the data sent by the client.
+                    //while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                    //{
+                    //    // Translate data bytes to a ASCII string.
+                    //    parser.Request += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                    //    Console.WriteLine("Received: {0}", data);
+                    //
+                    //}
+                    //// Process the data sent by the client.
+                    //parser.ParseData();
+                    //var rh = new RequestHandler();
+                    //rh.HandleRequest(parser);
+                    //
+                    //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                    //
+                    //// Send back a response.
+                    //stream.Write(msg, 0, msg.Length);
+                    //Console.WriteLine("Sent: {0}", data);
                 }
             }
             catch (SocketException e)

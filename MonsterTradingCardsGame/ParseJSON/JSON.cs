@@ -35,7 +35,7 @@ namespace MonsterTradingCardsGame.ParseJSON
             {
                 foreach (var item in jsonFile[i.ToString()])
                 {
-                    allCards.Add(new Card((string)item.name, (int)item.damage, (int)item.type, i));
+                    //allCards.Add(new Card((string)item.name, (int)item.damage, (int)item.type, i));
                 }
             }
 
@@ -50,7 +50,7 @@ namespace MonsterTradingCardsGame.ParseJSON
             var rand = new Random();
             var cardType = rand.Next(1, 3);
             var item = jsonFile[cardType.ToString()][(cardType == 1 ? rand.Next(0,6) : rand.Next(0, 15))];
-            return new Card((string)item.name, (int)item.damage, (int)item.type, cardType);
+            return new Card("id", (string)item.name, (int)item.damage, "(int)item.type", "cardType");
         }
     }
 }
