@@ -5,17 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MonsterTradingCardsGame.CardNamespace;
+using MonsterTradingCardsGame.DBconn.Tables;
 using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn
 {
-    public class DB
+    public class DB : DbStack, DbPackages
+
     {
-        private const string ConnString = "Server=127.0.0.1;" + 
-                                          "Username=postgres;" + 
-                                          "Database=MonterTradingCardGame;" + 
-                                          "Port=5432;" + 
-                                          "Password=bruhchungus;"+
+        private const string ConnString = "Server=127.0.0.1;" +
+                                          "Username=postgres;" +
+                                          "Database=MonterTradingCardGame;" +
+                                          "Port=5432;" +
+                                          "Password=bruhchungus;" +
                                           "SSLMode=Prefer";
 
         public NpgsqlConnection? Conn;
@@ -29,10 +31,11 @@ namespace MonsterTradingCardsGame.DBconn
                 Conn = new NpgsqlConnection(ConnString);
                 Console.Out.WriteLine("Opening connection");
                 Conn.Open();
+                Console.WriteLine("Connected!");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine("Connection failed due to the following error: " + Environment.NewLine + e);
                 throw;
             }
         }
@@ -45,7 +48,7 @@ namespace MonsterTradingCardsGame.DBconn
         public string RegisterUser(string username, string password)
         {
             using var command = new NpgsqlCommand("INSERT INTO public.users(u_id, username, pw, coins, elo) " +
-                                                                           "VALUES(default, @user, @pw, 20, 100); ", Conn);
+                                                  "VALUES(default, @user, @pw, 20, 100); ", Conn);
             command.Parameters.AddWithValue("@user", username);
             command.Parameters.AddWithValue("@pw", password);
             try
@@ -60,14 +63,19 @@ namespace MonsterTradingCardsGame.DBconn
             }
         }
 
+
+
         public string LoginUser(string username, string password)
         {
+
+
             using var command = new NpgsqlCommand("SELECT username, pw " +
-                                                         "FROM users " +
-                                                         "WHERE username = @user " +
-                                                           "AND pw = @pw; ", Conn);
+                                                  "FROM users " +
+                                                  "WHERE username = @user " +
+                                                  "AND pw = @pw; ", Conn);
             command.Parameters.AddWithValue("@user", username);
             command.Parameters.AddWithValue("@pw", password);
+            command.Prepare();
             try
             {
                 var reader = command.ExecuteReader();
@@ -76,8 +84,9 @@ namespace MonsterTradingCardsGame.DBconn
                     reader.Close();
                     return $"Welcome to MTCG, {username}!";
                 }
+
                 reader.Close();
-                return $"Login failed!";
+                return "Login failed!";
             }
             catch (Exception e)
             {
@@ -85,11 +94,13 @@ namespace MonsterTradingCardsGame.DBconn
                 //throw DuplicateNameException();
             }
         }
-        
+
         // Fix this
         public string UpdateUser(string username, string name2, string bio, string img)
         {
-            using var command = new NpgsqlCommand("UPDATE public.users SET bio='adgda', image='@img', second_name='adagklg' WHERE username='Me';", Conn);
+            using var command =
+                new NpgsqlCommand(
+                    "UPDATE public.users SET bio='adgda', image='@img', second_name='adagklg' WHERE username='Me';", Conn);
             command.Parameters.AddWithValue("@name2", name2);
             command.Parameters.AddWithValue("@user", username);
             command.Parameters.AddWithValue("@bio", bio);
@@ -127,47 +138,15 @@ namespace MonsterTradingCardsGame.DBconn
 
             return new string(stringChars);
         }
-        public string CreatePackage(dynamic cards)
+
+
+        public Exception OperationCanceledException { get; set; }
+
+        public bool CreateCard(string id, string name, int dmg)
         {
-            var cardsList = new List<Card>();
-            Card? newCard = null;
-            bool failed  = false;
-            foreach (var card in cards)
-            {
-                newCard = CreateCard(card.Id.ToString(), card.Name.ToString(), (int)card.Damage);
-                failed = newCard == null;
-                cardsList.Add(newCard);
 
-                using var command = new NpgsqlCommand("INSERT INTO packages(p_id, card_id) " +
-                                                                           "VALUES(@p_id, @c_id)", Conn);
-                command.Parameters.AddWithValue("@p_id", GetRandomString());
-                command.Parameters.AddWithValue("@c_id", card.Id.ToString());
-                try
-                {
-                    var worked = command.ExecuteNonQuery();
-                    failed = worked != 1;
-                    if (failed)
-                    {
-                        break;
-                    }
-                }
-                catch (Exception e)
-                {
-                    Disconnect();
-                    return null;
-                    //throw DuplicateNameException();
-                }
-            }
-
-            
-            return new string("af");
-
-        }
-
-        public Card CreateCard(string id, string name, int dmg)
-        {
             using var command = new NpgsqlCommand("INSERT INTO public.cards(name, damage, c_id) " +
-                                                                           "VALUES(@name, @dmg, @id)", Conn);
+                                                  "VALUES(@name, @dmg, @id)", Conn);
             command.Parameters.AddWithValue("@name", name);
             command.Parameters.AddWithValue("@dmg", dmg);
             command.Parameters.AddWithValue("@id", id);
@@ -175,11 +154,16 @@ namespace MonsterTradingCardsGame.DBconn
             {
                 var worked = command.ExecuteNonQuery();
                 Console.WriteLine(worked == 1 ? "Card has been added" : "Problem occurred adding card!");
-                return new Card(id, name, dmg, null, null);
+                return true;
             }
-            catch (Exception e)
+            catch (NpgsqlException e)
             {
-                return null;
+                if (e.Message.Split(':')[0] == "23505") // unique = card already there
+                {
+                    return true;
+                }
+
+                return false; // evtl throw
             }
         }
 
@@ -195,6 +179,7 @@ namespace MonsterTradingCardsGame.DBconn
                 {
                     return $"{username} has {reader.GetInt32(0)} points";
                 }
+
                 reader.Close();
                 return "";
             }
@@ -204,10 +189,14 @@ namespace MonsterTradingCardsGame.DBconn
                 //throw DuplicateNameException();
             }
         }
+
         public void UpdateUserStats(string username, int points)
         {
             Connect();
-            using var command = new NpgsqlCommand("UPDATE users SET elo = (Select elo from users where username = @user) + @pts WHERE username = @user; ", Conn);
+            using var command =
+                new NpgsqlCommand(
+                    "UPDATE users SET elo = (Select elo from users where username = @user) + @pts WHERE username = @user; ",
+                    Conn);
             command.Parameters.AddWithValue("@user", username);
             command.Parameters.AddWithValue("@pts", points);
 
@@ -221,6 +210,7 @@ namespace MonsterTradingCardsGame.DBconn
                 Console.WriteLine(e.Message);
                 //throw DuplicateNameException();
             }
+
             Disconnect();
         }
 
@@ -234,6 +224,7 @@ namespace MonsterTradingCardsGame.DBconn
                 {
                     Console.WriteLine($"{reader.GetString(0)}: {reader.GetInt32(1)}");
                 }
+
                 reader.Close();
             }
             catch (Exception e)
@@ -241,9 +232,10 @@ namespace MonsterTradingCardsGame.DBconn
                 Console.WriteLine(e.Message);
                 //throw DuplicateNameException();
             }
+
             Disconnect();
         }
-        
+
         public void SelectAllUsers()
         {
             Connect();
@@ -255,6 +247,7 @@ namespace MonsterTradingCardsGame.DBconn
                 {
                     Console.WriteLine($"Reading from user id: {reader.GetInt32(0)}, {reader.GetString(1)}");
                 }
+
                 reader.Close();
             }
             catch (Exception e)
@@ -262,6 +255,7 @@ namespace MonsterTradingCardsGame.DBconn
                 Console.WriteLine(e.Message);
                 //throw DuplicateNameException();
             }
+
             Disconnect();
         }
     }

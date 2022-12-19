@@ -13,7 +13,7 @@ namespace user
         private string name;
         private int _coins = 20;
         public Deck _deck = new();
-        private readonly Stack _stack = new();
+        private Stack _stack = new();
         public bool AUTOMATICGAME = true;
 
         public User(string name)

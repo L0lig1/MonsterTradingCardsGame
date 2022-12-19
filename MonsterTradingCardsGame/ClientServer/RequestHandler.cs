@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MonsterTradingCardsGame.ClientServer.Http;
 using MonsterTradingCardsGame.DBconn;
 
 namespace MonsterTradingCardsGame.ClientServer
@@ -11,75 +12,78 @@ namespace MonsterTradingCardsGame.ClientServer
     {
         private DB _db = new DB();
         public string Response = " ";
-        public string HandleRequest(HttpParser? request)
+
+        // kleinere methoden
+        public string HandleRequest(Http.Http? request)
         {
+            
             _db.Connect();
             if (request == null) Response = "Failed";
-            switch (request.Url?[0])
+            switch (request.Header.Url)
             {
-                case "users":
-                    if (request.Url.Length == 1 && request.Data != null)
+                case "/users":
+                    if (request.Header.Url.Split('/').Length == 2 && request.Body != null && request.Body.Data != null)
                     {
-                        Response = _db.RegisterUser(request.Data.Username.ToString(), request.Data.Password.ToString());
+                        Response = _db.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString());
                         break;
                     } 
-                    if (request.Url.Length > 1 && request.Data != null)
+                    if (request.Header.Url.Split('/').Length > 2 && request.Body != null && request.Body.Data != null)
                     {
                         // Edit User Data
-                        Response = _db.UpdateUser(request.Url[1], request.Data.Name.ToString(), request.Data.Bio.ToString(), request.Data.Image.ToString());
+                        Response = _db.UpdateUser(request.Header.Url.Split()[1], request.Body.Data.Name.ToString(), request.Body.Data.Bio.ToString(), request.Body.Data.Image.ToString());
                         break;
                     }
 
                     Response = "Failed";
                     break;
-                case "sessions":
+                case "/sessions":
                     // login
-                    Response = _db.LoginUser(request.Data.Username.ToString(), request.Data.Password.ToString());
+                    Response = _db.LoginUser(request.Body.Data.Username.ToString(), request.Body.Data.Password.ToString());
                     break;
-                case "packages":
-                    _db.CreatePackage(request.Data);
+                case "/packages":
                     // Create packages
-                    Response = "aklsf";
+                    Response = _db.CreatePackage(request.Body.Data);
                     break;
-                case "transactions":
-                    if (request.Url[1] == "packages")
+                case "/transactions":
+                    if (request.Header.Url.Split()[1] == "packages")
                     {
                         // Aqcuire packages
+                        _db.AddCardToStack(request.Header.AuthKey.Split('-')[0], "s", _db.Conn);
                         break;
                     }
                     Response = "afjlsk";
                     break;
-                case "cards":
+                case "/cards":
                     // show cards (stack)
                     Response = "AKJFdb";
                     break;
-                case "deck":
-                    if (request.Data != null)
+                case "/deck":
+                    if (request.Body != null && request.Body.Data != null)
                     {
                         Response = "alfkjdns"; // configure deck
                         break;
                     }
-                    var data = request.Url[0];
+                    var data = request.Header.Url.Split()[0];
                     Response = data.Split('?').Length == 1 ?
                         // Show Deck
                         "akfjdsb" : "aflkds"; // Show Different Config
                     break;
-                case "stats":
+                case "/stats":
                     // show Stats
-                    Response = _db.UserStats(request.AuthorizationUser);
+                    Response = _db.UserStats(request.Header.AuthKey.Split('-')[0]);
                     break;
-                case "score":
+                case "/score":
                     Response = "ajklfdb";
                     break;
-                case "tradings":
-                    switch (request.Method)
+                case "/tradings":
+                    switch (request.Header.Method)
                     {
-                        case "GET":
+                        case "/GET":
                             // check Trading deals
                             Response = "aöfs";
                             break;
-                        case "POST":
-                            if (request.Url.Length == 1)
+                        case "/POST":
+                            if (request.Header.Url.Length == 1)
                             {
                                 // Create Trading deal
                                 break;
@@ -87,7 +91,7 @@ namespace MonsterTradingCardsGame.ClientServer
                             // Trade (check for self trade, invalid user, invalid card)
                             Response = "afsdjk";
                             break;
-                        case "DELETE":
+                        case "/DELETE":
                             Response = "afsdlk";
                             break;
                     }

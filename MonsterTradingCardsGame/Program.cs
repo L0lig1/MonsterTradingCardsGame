@@ -12,8 +12,13 @@ namespace MonsterTradingCardsGame
     {
         public static void Main(String[] args)
         {
-            var server = new Server();
-            server.Listen();
+            //var server = new Server();
+            //server.Listen();
+            var db = new DB();
+            db.Connect();
+            db.AddCardToStack("Marcin", "2", db.Conn);
+            db.AddCardToStack("Marcin", "1", db.Conn);
+
             //db.Scoreboard();
             //db.UpdateUserStats("Marcin", -100);
             //db.UserStats("Marcin");

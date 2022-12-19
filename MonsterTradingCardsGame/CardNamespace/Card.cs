@@ -39,7 +39,7 @@ namespace MonsterTradingCardsGame.CardNamespace
             {
                 if (ValidCardTypes.Any(value.Contains))
                 {
-                    _elementType = value;
+                    _cardType = value;
                 } 
                 else
                 {
