@@ -1,5 +1,8 @@
-﻿using MonsterTradingCardsGame.ClientServer;
+﻿using System.Net;
+using MonsterTradingCardsGame.ClientServer;
+using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.DBconn;
+using MonsterTradingCardsGame.DBconn.Tables;
 using MonsterTradingCardsGame.StoreNamespace;
 using user;
 
@@ -12,12 +15,18 @@ namespace MonsterTradingCardsGame
     {
         public static void Main(String[] args)
         {
-            //var server = new Server();
-            //server.Listen();
-            var db = new DB();
-            db.Connect();
-            db.AddCardToStack("Marcin", "2", db.Conn);
-            db.AddCardToStack("Marcin", "1", db.Conn);
+            var server = new Server();
+            server.Listen();
+            //var hd = new ClientServer.Http.Response.HttpResponseHeader((HttpStatusCode)200, "application/json");
+            //var rp = hd.GetResponse();
+            //var db = new DB();
+            //db.Connect();
+            ////db.AddCardToStack("Marcin", "2", db.Conn);
+            ////db.AddCardToStack("Marcin", "1", db.Conn);
+            //var br = new DbPackages();
+            //var p_id = br.SelectRandomP_id(db.Conn);
+            //var yo = br.GetPackage(p_id, db.Conn);
+            //var deleted = br.DeletePackage(p_id, db.Conn);
 
             //db.Scoreboard();
             //db.UpdateUserStats("Marcin", -100);

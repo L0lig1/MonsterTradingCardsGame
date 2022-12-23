@@ -1,7 +1,7 @@
 ﻿
-namespace MonsterTradingCardsGame.ClientServer.http
+namespace MonsterTradingCardsGame.ClientServer.Http.Request
 {
-    public class HttpHeader
+    public class HttpRequestHeader
     {
         private readonly string[] _validHttpMethods = { "GET", "POST", "PUT", "DELETE" };
         private readonly string[] _validAuthTypes = { "Basic" };
@@ -63,7 +63,7 @@ namespace MonsterTradingCardsGame.ClientServer.http
 
         public string? AuthKey { get; set; }
 
-        public HttpHeader(string httpVersion, string method, string url, string? authType, string? authKey)
+        public HttpRequestHeader(string httpVersion, string method, string url, string? authType, string? authKey)
         {
             HttpVersion = httpVersion;
             Method = method;

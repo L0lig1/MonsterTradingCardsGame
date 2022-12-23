@@ -5,11 +5,14 @@ using System;
 
 using MonsterTradingCardsGame.ClientServer;
 using MonsterTradingCardsGame.ClientServer.Http;
+using MonsterTradingCardsGame.ClientServer.Http.Response;
+using MonsterTradingCardsGame.ParseJSON;
+using Newtonsoft.Json;
 
 
 namespace MonsterTradingCardsGame.ClientServer
 {
-    internal class Server
+    internal class Server : HttpParser
     {
         public async Task Listen()
         {
@@ -53,43 +56,23 @@ namespace MonsterTradingCardsGame.ClientServer
                     {
                         // Translate data bytes to a ASCII string.
                         recvData += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine("Received: {0}", data);
+                        Console.WriteLine($"Received: {data}");
                         // end zeichen
                         if (i is not 0 and not 256)
                         {
                             break;
                         }
-
                     }
                     // Process the data sent by the client.
                     var rh = new RequestHandler();
-                    var response = rh.HandleRequest(new HttpParser().ParseHttpData(recvData));
+                    var response = rh.HandleRequest(ParseHttpData(recvData));
                     
                     
-                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
+                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body.GetHttpBody());
                     
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
-                    Console.WriteLine("Sent: {0}", data);
-
-                    //// Loop to receive all the data sent by the client.
-                    //while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-                    //{
-                    //    // Translate data bytes to a ASCII string.
-                    //    parser.Request += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    //    Console.WriteLine("Received: {0}", data);
-                    //
-                    //}
-                    //// Process the data sent by the client.
-                    //parser.ParseData();
-                    //var rh = new RequestHandler();
-                    //rh.HandleRequest(parser);
-                    //
-                    //byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-                    //
-                    //// Send back a response.
-                    //stream.Write(msg, 0, msg.Length);
-                    //Console.WriteLine("Sent: {0}", data);
+                    Console.WriteLine($"Sent: {data}");
                 }
             }
             catch (SocketException e)

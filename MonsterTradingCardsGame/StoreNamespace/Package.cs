@@ -10,6 +10,7 @@ using MonsterTradingCardsGame.ParseJSON;
 namespace MonsterTradingCardsGame.StoreNamespace
 {
     public class Package
+
     {
         private int _price;
         public List<Card> package = new List<Card>();

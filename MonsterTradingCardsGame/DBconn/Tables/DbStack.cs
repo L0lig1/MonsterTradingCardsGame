@@ -7,11 +7,12 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    public interface DbStack
+    public class DbStack
     {
 
         public string AddCardToStack(string username, string card_id, NpgsqlConnection Conn)
         {
+            // myb change u_id to username
             using var command = new NpgsqlCommand("INSERT INTO public.stack(user_id, card_id, amount) " +
                                                                            "VALUES((SELECT u_id " +
                                                                                    "FROM users " +
