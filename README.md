@@ -1,12 +1,9 @@
 MonsterTradingCardsGame
 
 TODO:
-- DONE Datenbank Verbindung muss funktionieren
 - Threads
-- SQL Injection?
 - Unit Tests
-- Fix Response
-- Parse data line by line damit du im while rausgehen kannst    
+- Handling vereinheitlichen: INSERT, SELECT multirow, SELECT 1 row, UPDATE, DELETE  
 - RequestHandler
     User:
         DONE DONE user registration
