@@ -6,20 +6,20 @@ TODO:
 - SQL Injection?
 - Unit Tests
 - Fix Response
-- Parse data line by line damit du im while rausgehen kannst
+- Parse data line by line damit du im while rausgehen kannst    
 - RequestHandler
     User:
         DONE DONE user registration
-        (Token??) DONE DONE user login
+        DONE DONE user login
         (FIX) DONE edit user data
         DONE DONE stats: 1 user
-        DONE scoreboard: all users
+        DONE DONE scoreboard: all users
         state management (tokens unso)
     Packages + Stack:
-        (FIX) create/add packages
-        aquire packages
+        DONE DONE create/add packages
+        DONE DONE aquire packages
     Stack:
-        show stack (all acquired cards)
+        DONE DONE show stack (all acquired cards)
     Deck:
         show deck
         show deck different representation (was?)
@@ -35,3 +35,10 @@ TODO:
 
 - pro tabelle eine klasse
 
+Aquire package
+// SELECT latest added package, save result // PACKAGE TABLE
+// loop INSERT card into user (from result) // STACK TABLE
+// if user alr has card: amount += 1 // STACK TABLE
+
+Show cards 
+// SELECT * FROM cards JOIN stack on cards.c_id = stack.card_id WHERE username = x // STACK TABLE

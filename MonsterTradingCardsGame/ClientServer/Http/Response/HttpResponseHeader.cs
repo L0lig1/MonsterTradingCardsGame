@@ -40,7 +40,7 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Response
 
         public HttpResponseHeader(HttpStatusCode statusCode, string contentType, int contentLength)
         {
-            _contentLength = 200;
+            _contentLength = contentLength;
             _contentType = contentType;
             StatusCode = statusCode;
             _version = "1.1";

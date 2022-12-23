@@ -1,6 +1,9 @@
 ﻿
 using Npgsql;
 
+
+using MonsterTradingCardsGame.ClientServer.Http.Response;
+
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
     internal class DbCards
@@ -29,5 +32,6 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 return false; // evtl throw
             }
         }
+
     }
 }

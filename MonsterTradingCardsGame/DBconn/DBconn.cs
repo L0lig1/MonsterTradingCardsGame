@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterTradingCardsGame.CardNamespace;
-
-using MonsterTradingCardsGame.ClientServer.Http.Request;
+﻿using MonsterTradingCardsGame.ClientServer.Http.Request;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.DBconn.Tables;
 using Npgsql;
+using System.Net;
 
 namespace MonsterTradingCardsGame.DBconn
 {
@@ -24,8 +16,9 @@ namespace MonsterTradingCardsGame.DBconn
     public class DB
 
     {
-        //private DbPackages _dbPackages = new DbPackages();
+        private DbPackages _dbPackages = new DbPackages();
         private readonly DbUsers _dbUser = new DbUsers();
+        private readonly DbStack _dbStack = new DbStack();
 
         private const string ConnString = "Server=127.0.0.1;" +
                                           "Username=postgres;" +
@@ -34,7 +27,7 @@ namespace MonsterTradingCardsGame.DBconn
                                           "Password=bruhchungus;" +
                                           "SSLMode=Prefer";
 
-        public NpgsqlConnection? Conn;
+        public NpgsqlConnection Conn;
 
         public HttpResponse HttpResponse;
 
@@ -61,6 +54,14 @@ namespace MonsterTradingCardsGame.DBconn
             Conn.Close();
         }
 
+        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
+        {
+            return new HttpResponse
+            {
+                Header = new ClientServer.Http.Response.HttpResponseHeader(status, "text/plain", body.Length),
+                Body = new HttpResponseBody(body)
+            };
+        }
 
         public HttpResponse UserRoute(HttpRequest request)
         {
@@ -87,6 +88,107 @@ namespace MonsterTradingCardsGame.DBconn
             return _dbUser.LoginUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
         }
 
-        
+        public HttpResponse PackagesRoute(HttpRequest request)
+        {
+            try
+            {
+                if (request.Body?.Data != null)
+                {
+                    return request.Header.AuthKey?.Split('-')[0] == "admin" 
+                        ? _dbPackages.CreatePackage(request.Body?.Data, Conn) 
+                        : CreateHttpResponse(HttpStatusCode.Unauthorized, "Only admins can create packages");
+                }
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Could not create Package!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e); 
+                throw;
+            }
+        }
+
+        public HttpResponse TransactionsRoute(HttpRequest request)
+        {
+            try
+            {
+                var username = request.Header.AuthKey?.Split('-')[0];
+                if (request.Header.Url.Split('/')[2] == "packages")
+                {
+                    // Aqcuire packages
+                    //_db.AddCardToStack(request.Header.AuthKey.Split('-')[0], "s", _db.Conn);
+
+                    if (!_dbUser.HasEnoughCoins(username, Conn))
+                    {
+                        return CreateHttpResponse(HttpStatusCode.Conflict, "Not enough coins!");
+                    }
+
+                    _dbUser.UseCoins(username, 5, Conn);
+                    var packages = _dbPackages.GetPackage(Conn);
+                    foreach (var package in packages)
+                    {
+                        var response = _dbStack.AddCardToStack(request.Header.AuthKey?.Split('-')[0],
+                            package.Split('@')[1], Conn);
+                        if (response.Header.StatusCode != HttpStatusCode.Created)
+                        {
+                            return response;
+                        }
+                    }
+
+
+                    _dbPackages.DeletePackage(packages[0].Split('@')[0], Conn);
+                    return CreateHttpResponse(HttpStatusCode.OK,
+                        $"Cards added to {request.Header.AuthKey?.Split('-')[0]}'s stack!");
+                }
+
+            }
+
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Error occured: " + Environment.NewLine + e.Message); //throw;
+            }
+            return CreateHttpResponse(HttpStatusCode.Conflict, "Error occured"); //throw;
+        }
+
+        public HttpResponse CardsRoute(HttpRequest request)
+        {
+            try
+            {
+
+                return _dbStack.ShowStack(request.Header.AuthKey?.Split('-')[0], Conn);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+        public HttpResponse StatsRoute(HttpRequest request)
+        {
+            try
+            {
+
+                return _dbUser.UserStats(request.Header.AuthKey?.Split('-')[0], Conn);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public HttpResponse ScoreRoute(HttpRequest request)
+        {
+            try
+            {
+
+                return _dbUser.Scoreboard(Conn);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
     }
 }

@@ -26,34 +26,29 @@ namespace MonsterTradingCardsGame.ClientServer
             {
                 //return _db.CreateHttpResponse(HttpStatusCode.BadRequest, "Request failed");
             }
-            switch (request.Header.Url)
+            switch (request.Header.Url.Split('/')[1])
             {
-                case "/users":
+                case "users":
                     Response = _db.UserRoute(request);
                     break;
-                case "/sessions":
+                case "sessions":
                     // login
                     Response = _db.SessionRoute(request);
                     break;
-                case "/packages":
+                case "packages":
                     // Create packages
-            
-                    //Response = _dbPkg.CreatePackage(request.Body.Data, _db.Conn);
+                    Response = _db.PackagesRoute(request);
                     break;
-                case "/transactions":
-                    if (request.Header.Url.Split()[1] == "packages")
-                    {
-                        // Aqcuire packages
-                        //_db.AddCardToStack(request.Header.AuthKey.Split('-')[0], "s", _db.Conn);
-                        break;
-                    }
+                case "transactions":
+                    Response = _db.TransactionsRoute(request);
+                    
                     //Response = "afjlsk";
                     break;
-                case "/cards":
+                case "cards":
                     // show cards (stack)
-                    //Response = "AKJFdb";
+                    Response = _db.CardsRoute(request);
                     break;
-                case "/deck":
+                case "deck":
                     if (request.Body != null && request.Body.Data != null)
                     {
                         //Response = "alfkjdns"; // configure deck
@@ -64,14 +59,14 @@ namespace MonsterTradingCardsGame.ClientServer
                         // Show Deck
                         //"akfjdsb" : "aflkds"; // Show Different Config
                     break;
-                case "/stats":
+                case "stats":
                     // show Stats
-                    //Response = _dbUser.UserStats(request.Header.AuthKey.Split('-')[0], _db.Conn);
+                    Response = _db.StatsRoute(request);
                     break;
-                case "/score":
-                    //Response = "ajklfdb";
+                case "score":
+                    Response = _db.ScoreRoute(request);
                     break;
-                case "/tradings":
+                case "tradings":
                     switch (request.Header.Method)
                     {
                         case "/GET":
@@ -94,7 +89,7 @@ namespace MonsterTradingCardsGame.ClientServer
                     //Response = "afdk";
                     break;
                 default:
-                    //Response = "Invalid request";
+                    Response = _db.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request");
                     break;
             }
             _db.Disconnect();

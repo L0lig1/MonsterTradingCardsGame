@@ -6,6 +6,14 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 {
     internal class DbUsers
     {
+        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
+        {
+            return new HttpResponse
+            {
+                Header = new ClientServer.Http.Response.HttpResponseHeader(status, "text/plain", body.Length),
+                Body = new HttpResponseBody(body)
+            };
+        }
 
         public HttpResponse RegisterUser(string username, string password, NpgsqlConnection Conn)
         {
@@ -36,19 +44,9 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 throw;
             }
         }
-        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
-        {
-            return new HttpResponse
-            {
-                Header = new ClientServer.Http.Response.HttpResponseHeader(status, "text/plain", body.Length),
-                Body = new HttpResponseBody(body)
-            };
-        }
 
         public HttpResponse LoginUser(string username, string password, NpgsqlConnection Conn)
         {
-
-
             using var command = new NpgsqlCommand("SELECT username, pw " +
                                                   "FROM users " +
                                                   "WHERE username = @user " +
@@ -75,7 +73,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 //throw DuplicateNameException();
             }
         }
-
+        
         // Fix this
         public HttpResponse UpdateUser(string username, string name2, string bio, string img, NpgsqlConnection Conn)
         {
@@ -106,7 +104,58 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
-        public string UserStats(string username, NpgsqlConnection Conn)
+        public bool UseCoins(string username, int coinToPay, NpgsqlConnection Conn)
+        {
+            using var command = new NpgsqlCommand("UPDATE users SET coins = ((SELECT coins FROM users WHERE username = @user) - @ctp) WHERE username = @user; ", Conn);
+            command.Parameters.AddWithValue("@user", username);
+            command.Parameters.AddWithValue("@ctp", coinToPay);
+
+            try
+            {
+                var worked = command.ExecuteNonQuery();
+                return worked == 1;
+            }
+            catch (Exception e)
+            {
+                
+                Console.WriteLine(e.Message);
+                return false;
+                //throw DuplicateNameException();
+            }
+        }
+
+        public bool HasEnoughCoins(string username, NpgsqlConnection Conn)
+        {
+            using var command = new NpgsqlCommand("SELECT coins " +
+                                                  "FROM users " +
+                                                  "WHERE username = @user ", Conn);
+            command.Parameters.AddWithValue("@user", username);
+            command.Prepare();
+            try
+            {
+                var reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    var coins = reader.GetInt32(0);
+                    if (coins >= 5)
+                    {
+                        reader.Close();
+                        return true;
+                    }
+
+                }
+
+                reader.Close();
+                return false;
+
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public HttpResponse UserStats(string username, NpgsqlConnection Conn)
         {
             using var command = new NpgsqlCommand("Select elo from users where username = @user;", Conn);
             command.Parameters.AddWithValue("@user", username);
@@ -114,22 +163,26 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             try
             {
                 var reader = command.ExecuteReader();
-                while (reader.Read())
+                if (reader.HasRows)
                 {
-                    return $"{username} has {reader.GetInt32(0)} points";
+
+                    while (reader.Read())
+                    {
+                        return CreateHttpResponse(HttpStatusCode.OK, $"{username} has {reader.GetInt32(0)} points");
+                    }   
                 }
 
                 reader.Close();
-                return "";
+                return CreateHttpResponse(HttpStatusCode.Conflict, "User not found");
             }
             catch (Exception e)
             {
-                return e.Message;
+                return CreateHttpResponse(HttpStatusCode.Conflict, $"asfafsafasfafs");
                 //throw DuplicateNameException();
             }
         }
 
-        public void UpdateUserStats(string username, int points, NpgsqlConnection Conn)
+        public HttpResponse UpdateUserStats(string username, int points, NpgsqlConnection Conn)
         {
             using var command =
                 new NpgsqlCommand(
@@ -141,32 +194,36 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             try
             {
                 var worked = command.ExecuteNonQuery();
-                Console.WriteLine(worked == 1 ? "ELO has been changed" : "Problem occurred while changing ELO!");
+                return worked == 1 
+                    ? CreateHttpResponse(HttpStatusCode.OK, "ELO has been changed")
+                    : CreateHttpResponse(HttpStatusCode.Conflict, "Problem occurred while changing ELO!");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Problem occurred while changing ELO!");
                 //throw DuplicateNameException();
             }
         }
 
-        public void Scoreboard(NpgsqlConnection Conn)
+        public HttpResponse Scoreboard(NpgsqlConnection Conn)
         {
             using var command = new NpgsqlCommand("Select username, elo from users;", Conn);
             try
             {
                 var reader = command.ExecuteReader();
+                string stack = "Username: ELO" + Environment.NewLine;
                 while (reader.Read())
                 {
-                    Console.WriteLine($"{reader.GetString(0)}: {reader.GetInt32(1)}");
+                    stack += reader.GetString(0) + ": " + reader.GetInt32(1) + Environment.NewLine;
                 }
 
                 reader.Close();
+                return CreateHttpResponse(HttpStatusCode.OK, stack);
+
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
-                //throw DuplicateNameException();
+                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga"); ;
             }
         }
 
