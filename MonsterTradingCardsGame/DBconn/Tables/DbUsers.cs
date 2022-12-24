@@ -71,10 +71,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
-                
-                Console.WriteLine(e.Message);
-                return false;
-                //throw DuplicateNameException();
+                throw new Exception("An error occured while trying to use coins! " + e.Message);
             }
         }
 
@@ -98,13 +95,13 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 }
 
                 reader.Close();
-                return false;
+                throw new Exception("Not enough coins!");
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return false;
+                throw new Exception("Error while retrieving coins: " + e.Message);
             }
         }
 

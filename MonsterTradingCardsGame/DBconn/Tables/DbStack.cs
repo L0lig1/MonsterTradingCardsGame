@@ -59,10 +59,10 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                     }
                     catch (Exception ee)
                     {
-                        return CreateHttpResponse(HttpStatusCode.Conflict, ee.Message.Split(Environment.NewLine)[0].ToString());
+                        return CreateHttpResponse(HttpStatusCode.Conflict, ee.Message.Split(Environment.NewLine)[0]);
                     }
                 }
-                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message.Split(Environment.NewLine)[0].ToString());
+                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message.Split(Environment.NewLine)[0]);
             }
         }
     }

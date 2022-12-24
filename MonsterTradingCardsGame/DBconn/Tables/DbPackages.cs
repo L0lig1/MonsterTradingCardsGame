@@ -34,7 +34,6 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
-
                 throw new Exception("Package could not be found due to the following error: " + Environment.NewLine + e.Message);
             }
         }

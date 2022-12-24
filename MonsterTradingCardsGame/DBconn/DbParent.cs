@@ -26,18 +26,21 @@ namespace MonsterTradingCardsGame.DBconn
         {
             for (var i = 0; i < values.GetLength(0); i++)
             {
-                command.Parameters.AddWithValue($"@{values[i,0]}", values[i, 0] == "dmg" ? int.Parse(values[i,1]) : values[i, 1]);
+                command.Parameters.AddWithValue($"@{values[i,0]}", 
+                    values[i, 0] == "dmg" || values[i, 0] == "ctp" || values[i, 0] == "pts"
+                        ? int.Parse(values[i,1]) 
+                        : values[i, 1]);
             }
         }
             
         public bool ExecNonQuery(string cmd, string[,]? values, NpgsqlConnection conn)
         {
             using var command = new NpgsqlCommand(cmd, conn);
-            AddParamWithValue(command, values);
+            if(values != null) AddParamWithValue(command, values);
             try
             {
                 var worked = command.ExecuteNonQuery();
-                if (worked != 1)
+                if (worked == -1)
                 {
                     throw new Exception("Didn't work lol");
                 }
@@ -64,21 +67,25 @@ namespace MonsterTradingCardsGame.DBconn
                 resp = resp.Remove(resp.Length - 1);
                 resp += Environment.NewLine;
             }
+            resp = resp.Remove(resp.Length - 2);
+            reader.Close();
             return resp;
         }
 
         public (bool, string) ExecQuery(string cmd, int queryRespSize, string[,]? values, NpgsqlConnection conn, bool recvResp)
         {
             using var command = new NpgsqlCommand(cmd, conn);
-            AddParamWithValue(command, values);
+            if (values != null) AddParamWithValue(command, values);
             try
             {
                 var reader = command.ExecuteReader();
                 if (reader.HasRows)
                 {
+                    command.Parameters.Clear();
                     return (true, recvResp ? GetQueryResponse(queryRespSize, reader) : "");
                 }
 
+                command.Parameters.Clear();
                 reader.Close();
                 return (false, "No results found");
 

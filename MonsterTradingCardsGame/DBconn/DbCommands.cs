@@ -51,15 +51,16 @@ namespace MonsterTradingCardsGame.DBconn
             { "ShowStack", "SELECT cards.name, stack.amount " +
                            "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
                            "WHERE stack.username = @user" },
-            { "AddToStack", "INSERT INTO public.stack(username, card_id, amount) " +
+            { "AddCardToStack", "INSERT INTO public.stack(username, card_id, amount) " +
                                               "VALUES(@user, @card, 1)" },
-            { "AddCardToStackDuplicate", "Update stack SET amount = (" +
+            { "AddCardToStackDuplicate", "Update stack " +
+                                         "SET amount = (" +
                                              "SELECT amount " +
                                              "FROM stack JOIN users on stack.username = users.username " +
-                                             "WHERE username = @user " +
+                                             "WHERE stack.username = @user " +
                                                "AND card_id = @card" +
                                          ") + 1 " +
-                                         "WHERE user_id = @user" +
+                                         "WHERE stack.username = @user " +
                                            "AND card_id = @card" },
 
             /* Packages */ 

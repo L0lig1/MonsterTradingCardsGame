@@ -108,19 +108,13 @@ namespace MonsterTradingCardsGame.DBconn
                 if (request.Header.Url.Split('/')[2] == "packages" && username != null && Conn != null)
                 {
                     // Aqcuire packages
-                    //_db.AddCardToStack(request.Header.AuthKey.Split('-')[0], "s", _db.Conn);
-
-                    if (!_dbUser.HasEnoughCoins(username, Conn))
-                    {
-                        return CreateHttpResponse(HttpStatusCode.Conflict, "Not enough coins!");
-                    }
-
+                    _dbUser.HasEnoughCoins(username, Conn);
                     _dbUser.UseCoins(username, 5, Conn);
+
                     var packages = _dbPackages.GetPackage(Conn);
                     foreach (var package in packages)
                     {
-                        var response = _dbStack.AddCardToStack(
-                            request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(),
+                        var response = _dbStack.AddCardToStack(username ?? throw new InvalidOperationException(),
                             package.Split('@')[1], Conn);
                         if (response.Header.StatusCode != HttpStatusCode.Created)
                         {
@@ -132,7 +126,7 @@ namespace MonsterTradingCardsGame.DBconn
                     _dbPackages.DeletePackage(packages[0].Split('@')[0], Conn);
 
                     return CreateHttpResponse(HttpStatusCode.OK,
-                        $"Cards added to {request.Header.AuthKey?.Split('-')[0]}'s stack!");
+                        $"Cards added to {username}'s stack!");
                 }
 
             }
