@@ -19,14 +19,14 @@ namespace MonsterTradingCardsGame.ClientServer.Http
             {
                 foreach (var line in requestSplit)
                 {
-                    if (!line.Contains(':') && !string.IsNullOrEmpty(line))
+                    if (!line.Contains(':') && !string.IsNullOrEmpty(line) && !line.Contains('['))
                     {
                         httpVersion = GetFirstLine(line, "HTTP/")[1];
                         method = GetFirstLine(line, " ")[0];
                         //Url = line.Split(' ')[1].Split('/').Skip(1).ToArray(); // Gets Url and seperates by '/'
                         url = GetFirstLine(line, " ")[1];
                     } 
-                    else if (line.Contains('{') || line.Contains('}')) // data
+                    else if (line.Contains('{') || line.Contains('}') || line.Contains('[')) // data
                     {
                         // check for invalid JSON
                         data = GetData(line);
@@ -38,7 +38,7 @@ namespace MonsterTradingCardsGame.ClientServer.Http
                         authorizationType = GetAuthType(line);
                     }
                 }
-                return new Request.HttpRequest
+                return new HttpRequest
                 {
                     Header = new HttpRequestHeader(httpVersion, method, url, authorizationType, authorizationKey),
                     Body = new HttpRequestBody(data)

@@ -10,7 +10,7 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    public class DbStack : DbParent
+    public class DbStack : DbHandler
     {
 
         public HttpResponse ShowStack(string username, NpgsqlConnection conn)
@@ -23,15 +23,13 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             try
             {
                 var reader = command.ExecuteReader();
-                string stack = "Card Name: amount" + Environment.NewLine;
+                var stack = "Card Name: amount" + Environment.NewLine;
                 while (reader.Read())
                 {
-                    stack += reader.GetString(0) + ": " + reader.GetInt32(1).ToString() + Environment.NewLine;
+                    stack += reader.GetString(0) + ": " + reader.GetInt32(1) + Environment.NewLine;
                 }
-
                 reader.Close();
                 return CreateHttpResponse(HttpStatusCode.OK, stack);
-
             }
             catch (Exception e)
             {
@@ -63,6 +61,38 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                     }
                 }
                 return CreateHttpResponse(HttpStatusCode.Conflict, e.Message.Split(Environment.NewLine)[0]);
+            }
+        }
+
+        public HttpResponse ConfigureDeck(string username, dynamic cards, NpgsqlConnection conn)
+        {
+            try
+            {
+                if (cards.Count != 4) throw new Exception($"{cards.Count} cards provided instead of 4. Make sure to provide 4 cards!{Environment.NewLine}");
+                foreach (var card in cards)
+                {
+                    ExecNonQuery(Sql.Commands["AddCardToDeck"], new string[,] { { "user", username }, { "card", card.ToString() } }, conn);
+                }
+                return CreateHttpResponse(HttpStatusCode.OK, $"The provided cards have been added to {username}'s deck!");
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message + "You do not own the provided cards.");
+            }
+        }
+
+        public HttpResponse GetDeck(string username, NpgsqlConnection conn)
+        {
+            try
+            {
+                var resp = ExecQuery(Sql.Commands["GetDeck"], 1, new [,] { { "user", username } }, conn, true);
+                return resp.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
+                    : throw new Exception("User deck not found!");
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Error retrieving deck: " + e.Message);
             }
         }
     }

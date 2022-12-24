@@ -4,7 +4,7 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    internal class DbUsers : DbParent
+    internal class DbUsers : DbHandler
     {
         public new static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
         {
@@ -168,5 +168,19 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
+        public HttpResponse GetUser(string userUrl, string userToken, NpgsqlConnection conn)
+        {
+            try
+            {
+                var response = ExecQuery(Sql.Commands["GetUser"], 7, new[,] { { "user", userUrl } }, conn, true);
+                return response.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, $"{userUrl}'s Profile: {Environment.NewLine}{response.Item2}")
+                    : CreateHttpResponse(HttpStatusCode.Conflict, "User not found!");
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Unauthorized, "Error: " + e.Message);
+            }
+        }
     }
 }

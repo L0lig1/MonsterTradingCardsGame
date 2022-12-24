@@ -11,6 +11,7 @@ TODO:
     User:
         DONE DONE user registration
         DONE DONE user login
+        DONE DONE show user data
         DONE DONE edit user data
         DONE DONE stats: 1 user
         DONE DONE scoreboard: all users
@@ -19,16 +20,27 @@ TODO:
         DONE DONE create/add packages
         DONE DONE aquire packages
     Stack:
-        DONE DONE show stack (all acquired cards)
+        DONE show stack (all acquired cards)
     Deck:
-        show deck
+        DONE DONE show deck
         show deck different representation (was?)
-        configure deck
+        DONE DONE configure deck (delete when error in the middle)
     Battle
     Trade:
-        check trading deals
-        DONE create trading deals
-        DONE delete trading deals
+        Trade
+        DONE DONE check trading deals
+        DONE DONE create trading deals
+        DONE DONE delete trading deals
+    Authorization
+    Card+Monster type
 - Optional:
     Win/Lose Ratio
     ELO myb?
+
+
+- Errors:
+    Package already exists
+    Better error msg on 14)
+    Invalid request being printed twice?
+
+     

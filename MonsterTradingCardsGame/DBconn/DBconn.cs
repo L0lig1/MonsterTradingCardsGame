@@ -7,13 +7,14 @@ using System.Net;
 namespace MonsterTradingCardsGame.DBconn
 {
 
-    public class DB
+    public class Router
 
     {
-        private readonly DbPackages _dbPackages = new DbPackages();
-        private readonly DbUsers _dbUser = new DbUsers();
-        private readonly DbTradings _dbTradings = new DbTradings();
-        private readonly DbStack _dbStack = new DbStack();
+        private readonly DbPackages _dbPackages = new();
+        private readonly DbUsers _dbUser = new();
+        private readonly DbTradings _dbTradings = new();
+        private readonly DbStack _dbStack = new();
+
 
         private const string ConnString = "Server=127.0.0.1;" +
                                           "Username=postgres;" +
@@ -58,22 +59,31 @@ namespace MonsterTradingCardsGame.DBconn
 
         public HttpResponse UserRoute(HttpRequest request)
         {
-            if (request.Header.Url.Split('/').Length == 2 && request.Body != null && request.Body.Data != null)
+            try
             {
-                return _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
+                var splitUrl = request.Header.Url.Split('/');
+                var userToken = request.Header.AuthKey?.Split('-')[0];
+                if (splitUrl.Length > 2 && splitUrl[2] != userToken) throw new Exception("Unauthorized!");
+                if (splitUrl.Length == 2 && request.Body != null && request.Body.Data != null)
+                {
+                    return _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
+                }
+                if (splitUrl.Length > 2 && request.Body != null && request.Body.Data != null)
+                {
+                    return _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString(), Conn );
+                }
+                if (splitUrl.Length > 2 && request.Body != null && request.Body.Data == null)
+                {
+                    return _dbUser.GetUser(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
+                }
+
+                throw new Exception("Error!");
             }
-            if (request.Header.Url.Split('/').Length > 2 && request.Body != null && request.Body.Data != null)
+            catch (Exception e)
             {
-                // Edit User Data
-                return _dbUser.UpdateUser(
-                    request.Header.Url.Split('/')[2],
-                    request.Body?.Data?.Name.ToString(), 
-                    request.Body?.Data?.Bio.ToString(),
-                    request.Body?.Data?.Image.ToString(),
-                    Conn
-                );
+                Console.WriteLine(e);
+                return CreateHttpResponse(HttpStatusCode.BadRequest, "Error");
             }
-            return CreateHttpResponse(HttpStatusCode.BadRequest, "Error");
         }
 
         public HttpResponse SessionRoute(HttpRequest request)
@@ -109,7 +119,6 @@ namespace MonsterTradingCardsGame.DBconn
                 {
                     // Aqcuire packages
                     _dbUser.HasEnoughCoins(username, Conn);
-                    _dbUser.UseCoins(username, 5, Conn);
 
                     var packages = _dbPackages.GetPackage(Conn);
                     foreach (var package in packages)
@@ -124,7 +133,7 @@ namespace MonsterTradingCardsGame.DBconn
 
 
                     _dbPackages.DeletePackage(packages[0].Split('@')[0], Conn);
-
+                    _dbUser.UseCoins(username, 5, Conn);
                     return CreateHttpResponse(HttpStatusCode.OK,
                         $"Cards added to {username}'s stack!");
                 }
@@ -186,12 +195,12 @@ namespace MonsterTradingCardsGame.DBconn
         {
             try
             {
-
                 switch (request.Header.Method)
                 {
                     case "GET":
                         // check Trading deals
-                        break;
+                        if (Conn != null) return _dbTradings.CheckTradingDeal(Conn);
+                        throw new Exception("Db not conn");
                     case "POST":
                         if (request.Header.Url == "/tradings")
                         {
@@ -213,6 +222,29 @@ namespace MonsterTradingCardsGame.DBconn
             }
 
             return CreateHttpResponse(HttpStatusCode.Accepted, "jlkagdn");
+        }
+
+        public HttpResponse DeckRoute(HttpRequest request)
+        {
+            var username = request.Header.AuthKey?.Split('-')[0];
+            try
+            {
+                if (request.Body != null && request.Body.Data != null)
+                {
+                    return _dbStack.ConfigureDeck(username, request.Body?.Data, Conn); // configure deck
+                }
+
+                if (username != null && Conn != null) return _dbStack.GetDeck(username, Conn);
+                //Response = data.Split('?').Length == 1 ?
+                // Show Deck
+                //"akfjdsb" : "aflkds"; // Show Different representation
+                throw new Exception("adlfkn");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
     }
 }

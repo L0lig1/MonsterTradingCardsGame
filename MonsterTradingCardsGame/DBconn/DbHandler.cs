@@ -9,7 +9,7 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn
 {
-    public class DbParent
+    public class DbHandler
     {
         public DbCommands Sql = new();
         public static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
@@ -22,7 +22,7 @@ namespace MonsterTradingCardsGame.DBconn
         }
         
 
-        public void AddParamWithValue(NpgsqlCommand command, string[,]? values)
+        public void AddParamWithValue(NpgsqlCommand command, string[,] values)
         {
             for (var i = 0; i < values.GetLength(0); i++)
             {
@@ -40,9 +40,9 @@ namespace MonsterTradingCardsGame.DBconn
             try
             {
                 var worked = command.ExecuteNonQuery();
-                if (worked == -1)
+                if (worked <= 0)
                 {
-                    throw new Exception("Didn't work lol");
+                    throw new Exception("Error: ");
                 }
                 //return CreateHttpResponse(HttpStatusCode.OK, "Could not create package!");
                 return true;
@@ -72,7 +72,21 @@ namespace MonsterTradingCardsGame.DBconn
             return resp;
         }
 
-        public (bool, string) ExecQuery(string cmd, int queryRespSize, string[,]? values, NpgsqlConnection conn, bool recvResp)
+        private static string GetUserResponse(NpgsqlDataReader reader)
+        {
+            if (!reader.Read()) throw new Exception("Could not get User data");
+            var resp = $"Name:     {(reader.IsDBNull(6) ? "" : reader.GetString(6))}{Environment.NewLine}" + 
+                             $"Username: {reader.GetString(0)}{Environment.NewLine}" +
+                             $"Password: {reader.GetString(1)}{Environment.NewLine}" +
+                             $"Coins:    {(reader.IsDBNull(2) ? "" : reader.GetInt32(2))}{Environment.NewLine}" +
+                             $"ELO:      {(reader.IsDBNull(3) ? "" : reader.GetInt32(3))}{Environment.NewLine}" +
+                             $"Bio:      {(reader.IsDBNull(4) ? "" : reader.GetString(4))}{Environment.NewLine}" +
+                             $"Image:    {(reader.IsDBNull(5) ? "" : reader.GetString(5))}{Environment.NewLine}";
+            reader.Close();
+            return resp;
+        }
+
+        public (bool, string) ExecQuery(string cmd, int columnSize, string[,]? values, NpgsqlConnection conn, bool recvResp)
         {
             using var command = new NpgsqlCommand(cmd, conn);
             if (values != null) AddParamWithValue(command, values);
@@ -82,7 +96,11 @@ namespace MonsterTradingCardsGame.DBconn
                 if (reader.HasRows)
                 {
                     command.Parameters.Clear();
-                    return (true, recvResp ? GetQueryResponse(queryRespSize, reader) : "");
+                    return (true, recvResp 
+                        ? (cmd.Contains("SELECT * FROM users") 
+                            ? GetUserResponse(reader) 
+                            : GetQueryResponse(columnSize, reader)) 
+                        : "");
                 }
 
                 command.Parameters.Clear();

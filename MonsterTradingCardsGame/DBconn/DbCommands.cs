@@ -11,57 +11,108 @@ namespace MonsterTradingCardsGame.DBconn
         public Dictionary<string, string> Commands = new()
         {
             /* Users */ 
-            { "RegisterUser", "INSERT INTO public.users(username, pw, coins, elo) " +
-                                                "VALUES(@user, @pw, 20, 100);" },
-            { "LoginUser", "SELECT username, pw " +
-                           "FROM users " +
-                           "WHERE username = @user " +
-                             "AND pw = @pw;" },
-            { "UpdateUser", "UPDATE public.users " +
-                            "SET bio=@bio, image=@img, second_name=@newname " +
-                            "WHERE username=@user;" },
-            { "UseCoins", "UPDATE users " +
-                          "SET coins = ((" +
-                            "SELECT coins " +
-                             "FROM users " +
-                             "WHERE username = @user" +
-                          ") - @ctp) " +
-                          "WHERE username = @user; " },
-            { "HasEnoughCoins", "SELECT coins " +
-                                "FROM users " +
-                                "WHERE username = @user " },
+            {
+                "RegisterUser", 
+                "INSERT INTO public.users(username, pw, coins, elo) " +
+                                  "VALUES(@user, @pw, 20, 100);"
+            },
+            { 
+                "LoginUser", 
+                "SELECT username, pw " +
+                "FROM users " +
+                "WHERE username = @user " +
+                  "AND pw = @pw;"
+            },
+            { 
+                "GetUser", 
+                "SELECT * " +
+                "FROM users " +
+                "WHERE username = @user"
+            },
+            { 
+                "UpdateUser", 
+                "UPDATE public.users " +
+                "SET bio=@bio, image=@img, second_name=@newname " +
+                "WHERE username=@user;"
+            },
+            { 
+                "UseCoins", 
+                "UPDATE users " +
+                "SET coins = ((" +
+                    "SELECT coins " +
+                    "FROM users " +
+                    "WHERE username = @user" +
+                ") - @ctp) " +
+                "WHERE username = @user; "
+            },
+            { 
+                "HasEnoughCoins", 
+                "SELECT coins " +
+                "FROM users " +
+                "WHERE username = @user " },
             { "UserStats", "SELECT elo " +
                            "FROM users " +
                            "WHERE username = @user;" },
-            { "UpdateUserStats", "UPDATE users " +
-                                 "SET elo = (" +
-                                    "SELECT elo " +
-                                    "FROM users " +
-                                    "WHERE username = @user" +
-                                 ") + @pts " +
-                                 "WHERE username = @user; " },
-            { "Scoreboard", "SELECT username, elo " +
-                            "FROM users;" },
+            { "UpdateUserStats", 
+                "UPDATE users " +
+                "SET elo = (" +
+                    "SELECT elo " +
+                    "FROM users " +
+                    "WHERE username = @user" +
+                ") + @pts " +
+                "WHERE username = @user; "
+            },
+            { 
+                "Scoreboard", 
+                "SELECT username, elo " +
+                "FROM users;"
+            },
 
             /* Cards */
-            { "CreateCard", "INSERT INTO public.cards(name, damage, c_id) " +
-                                              "VALUES(@name, @dmg, @c_id)" },
+            { 
+                "CreateCard", 
+                "INSERT INTO public.cards(name, damage, c_id) " +
+                                  "VALUES(@name, @dmg, @c_id)"
+            },
 
             /* Stack */
-            { "ShowStack", "SELECT cards.name, stack.amount " +
-                           "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
-                           "WHERE stack.username = @user" },
-            { "AddCardToStack", "INSERT INTO public.stack(username, card_id, amount) " +
-                                              "VALUES(@user, @card, 1)" },
-            { "AddCardToStackDuplicate", "Update stack " +
-                                         "SET amount = (" +
-                                             "SELECT amount " +
-                                             "FROM stack JOIN users on stack.username = users.username " +
-                                             "WHERE stack.username = @user " +
-                                               "AND card_id = @card" +
-                                         ") + 1 " +
-                                         "WHERE stack.username = @user " +
-                                           "AND card_id = @card" },
+            { 
+                "ShowStack", 
+                "SELECT cards.name, stack.amount " +
+                "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
+                "WHERE stack.username = @user"
+            },
+            { 
+                "AddCardToStack", 
+                "INSERT INTO public.stack(username, card_id, amount) " +
+                                  "VALUES(@user, @card, 1)"
+            },
+            { 
+                "AddCardToStackDuplicate", 
+                "Update stack " +
+                "SET amount = (" +
+                    "SELECT amount " +
+                    "FROM stack JOIN users on stack.username = users.username " +
+                    "WHERE stack.username = @user " +
+                      "AND card_id = @card" +
+                ") + 1 " +
+                "WHERE stack.username = @user " +
+                "AND card_id = @card"
+            },
+            {
+                "GetDeck", "SELECT cards.name "+
+                           "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
+                           "WHERE username = @user " +
+                             "AND deck = true"
+            },
+            { "AddCardToDeck", "UPDATE stack " +
+                               "SET deck = true " +
+                               "WHERE username = @user " +
+                                 "AND card_id = @card;"},            
+            { "RemoveCardFromDeck", "UPDATE stack " +
+                               "SET deck = false " +
+                               "WHERE username = @user " +
+                                 "AND card_id = @card;"},
 
             /* Packages */ 
             { "CreatePackage", "INSERT INTO packages(p_id, card_id) " +
@@ -77,9 +128,22 @@ namespace MonsterTradingCardsGame.DBconn
                                "WHERE p_id = @p_id" },
 
             /* Trading */
-            { "CreateTradingDeal", "INSERT INTO public.trading(trade_id, cardtotrade, cardtype, mindmg, username) " +
-                                                       "VALUES(@tid, @ctt, @ct, @dmg, @user);" },
-            { "DeleteTradingDeal", "DELETE FROM public.trading WHERE trade_id = @tid;" },
+            { 
+                "CreateTradingDeal", 
+                "INSERT INTO public.trading(trade_id, cardtotrade, cardtype, mindmg, username) " +
+                                    "VALUES(@tid, @ctt, @ct, @dmg, @user);"
+            },
+            { 
+                "CheckTradingDeal",
+                "SELECT trade_id, username, cards.name, trading.cardtype, mindmg " +
+                "FROM public.trading JOIN cards ON trading.cardtotrade = cards.c_id;"
+            },
+            {
+                "DeleteTradingDeal", 
+                "DELETE " +
+                "FROM public.trading " +
+                "WHERE trade_id = @tid;"
+            }
 
         };
     }

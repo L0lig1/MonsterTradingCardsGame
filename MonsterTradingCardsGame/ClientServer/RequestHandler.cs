@@ -13,67 +13,34 @@ namespace MonsterTradingCardsGame.ClientServer
 {
     internal class RequestHandler
     {
-        private DB _db = new DB();
-        public HttpResponse Response;
+        private readonly Router _router = new ();
+        public HttpResponse Response = new();
 
         // kleinere methoden
 
         public HttpResponse HandleRequest(Http.Request.HttpRequest? request)
         {
             
-            _db.Connect();
+            _router.Connect();
             if (request == null)
             {
                 //return _db.CreateHttpResponse(HttpStatusCode.BadRequest, "Request failed");
             }
-            switch (request.Header.Url.Split('/')[1])
+
+            Response = request?.Header.Url.Split('/')[1] switch
             {
-                case "users":
-                    Response = _db.UserRoute(request);
-                    break;
-                case "sessions":
-                    // login
-                    Response = _db.SessionRoute(request);
-                    break;
-                case "packages":
-                    // Create packages
-                    Response = _db.PackagesRoute(request);
-                    break;
-                case "transactions":
-                    Response = _db.TransactionsRoute(request);
-                    
-                    //Response = "afjlsk";
-                    break;
-                case "cards":
-                    // show cards (stack)
-                    Response = _db.CardsRoute(request);
-                    break;
-                case "deck":
-                    if (request.Body != null && request.Body.Data != null)
-                    {
-                        //Response = "alfkjdns"; // configure deck
-                        break;
-                    }
-                    var data = request.Header.Url.Split()[0];
-                    //Response = data.Split('?').Length == 1 ?
-                        // Show Deck
-                        //"akfjdsb" : "aflkds"; // Show Different Config
-                    break;
-                case "stats":
-                    // show Stats
-                    Response = _db.StatsRoute(request);
-                    break;
-                case "score":
-                    Response = _db.ScoreRoute(request);
-                    break;
-                case "tradings":
-                    Response = _db.TradingsRoute(request);
-                    break;
-                default:
-                    Response = _db.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request");
-                    break;
-            }
-            _db.Disconnect();
+                "users"        => _router.UserRoute(request),
+                "sessions"     => _router.SessionRoute(request),
+                "packages"     => _router.PackagesRoute(request),
+                "transactions" => _router.TransactionsRoute(request),
+                "cards"        => _router.CardsRoute(request),
+                "deck"         => _router.DeckRoute(request),
+                "stats"        => _router.StatsRoute(request),
+                "score"        => _router.ScoreRoute(request),
+                "tradings"     => _router.TradingsRoute(request),
+                _ => _router.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request")
+            };
+            _router.Disconnect();
             return Response;
         }
     }

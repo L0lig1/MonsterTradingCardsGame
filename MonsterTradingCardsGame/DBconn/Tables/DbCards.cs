@@ -6,7 +6,7 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    internal class DbCards : DbParent
+    internal class DbCards : DbHandler
     {
         public bool CreateCard(string id, string name, int dmg, NpgsqlConnection conn)
         {
