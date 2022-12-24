@@ -7,17 +7,12 @@ using System.Net;
 namespace MonsterTradingCardsGame.DBconn
 {
 
-    // DB.AquirePcks(){
-    //     var package = new DbPackages().GetPackage();
-    //         StorePackageinStack
-    //             Deletepackage
-    // }
-
     public class DB
 
     {
-        private DbPackages _dbPackages = new DbPackages();
+        private readonly DbPackages _dbPackages = new DbPackages();
         private readonly DbUsers _dbUser = new DbUsers();
+        private readonly DbTradings _dbTradings = new DbTradings();
         private readonly DbStack _dbStack = new DbStack();
 
         private const string ConnString = "Server=127.0.0.1;" +
@@ -27,9 +22,7 @@ namespace MonsterTradingCardsGame.DBconn
                                           "Password=bruhchungus;" +
                                           "SSLMode=Prefer";
 
-        public NpgsqlConnection Conn;
-
-        public HttpResponse HttpResponse;
+        public NpgsqlConnection? Conn;
 
 
 
@@ -51,7 +44,7 @@ namespace MonsterTradingCardsGame.DBconn
 
         public void Disconnect()
         {
-            Conn.Close();
+            Conn?.Close();
         }
 
         public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
@@ -73,14 +66,14 @@ namespace MonsterTradingCardsGame.DBconn
             {
                 // Edit User Data
                 return _dbUser.UpdateUser(
-                    request.Header.Url.Split()[1],
-                    request.Body.Data.Name.ToString(), 
-                    request.Body.Data.Bio.ToString(),
-                    request.Body.Data.Image.ToString(),
+                    request.Header.Url.Split('/')[2],
+                    request.Body?.Data?.Name.ToString(), 
+                    request.Body?.Data?.Bio.ToString(),
+                    request.Body?.Data?.Image.ToString(),
                     Conn
                 );
             }
-            return _dbUser.CreateHttpResponse(HttpStatusCode.BadRequest, "Error");
+            return CreateHttpResponse(HttpStatusCode.BadRequest, "Error");
         }
 
         public HttpResponse SessionRoute(HttpRequest request)
@@ -112,7 +105,7 @@ namespace MonsterTradingCardsGame.DBconn
             try
             {
                 var username = request.Header.AuthKey?.Split('-')[0];
-                if (request.Header.Url.Split('/')[2] == "packages")
+                if (request.Header.Url.Split('/')[2] == "packages" && username != null && Conn != null)
                 {
                     // Aqcuire packages
                     //_db.AddCardToStack(request.Header.AuthKey.Split('-')[0], "s", _db.Conn);
@@ -126,7 +119,8 @@ namespace MonsterTradingCardsGame.DBconn
                     var packages = _dbPackages.GetPackage(Conn);
                     foreach (var package in packages)
                     {
-                        var response = _dbStack.AddCardToStack(request.Header.AuthKey?.Split('-')[0],
+                        var response = _dbStack.AddCardToStack(
+                            request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(),
                             package.Split('@')[1], Conn);
                         if (response.Header.StatusCode != HttpStatusCode.Created)
                         {
@@ -136,6 +130,7 @@ namespace MonsterTradingCardsGame.DBconn
 
 
                     _dbPackages.DeletePackage(packages[0].Split('@')[0], Conn);
+
                     return CreateHttpResponse(HttpStatusCode.OK,
                         $"Cards added to {request.Header.AuthKey?.Split('-')[0]}'s stack!");
                 }
@@ -154,8 +149,8 @@ namespace MonsterTradingCardsGame.DBconn
         {
             try
             {
-
-                return _dbStack.ShowStack(request.Header.AuthKey?.Split('-')[0], Conn);
+                if (Conn != null) return _dbStack.ShowStack(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
+                throw new Exception("Db not connected");
             }
             catch (Exception e)
             {
@@ -163,12 +158,14 @@ namespace MonsterTradingCardsGame.DBconn
                 throw;
             }
         }
+
         public HttpResponse StatsRoute(HttpRequest request)
         {
             try
             {
-
-                return _dbUser.UserStats(request.Header.AuthKey?.Split('-')[0], Conn);
+                if (Conn != null)
+                    return _dbUser.UserStats(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
+                throw new Exception("DB not conn");
             }
             catch (Exception e)
             {
@@ -181,14 +178,47 @@ namespace MonsterTradingCardsGame.DBconn
         {
             try
             {
-
-                return _dbUser.Scoreboard(Conn);
+                if (Conn != null) return _dbUser.Scoreboard(Conn);
+                throw new Exception("Db not conn");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
                 throw;
             }
+        }
+
+        public HttpResponse TradingsRoute(HttpRequest request)
+        {
+            try
+            {
+
+                switch (request.Header.Method)
+                {
+                    case "GET":
+                        // check Trading deals
+                        break;
+                    case "POST":
+                        if (request.Header.Url == "/tradings")
+                        {
+                            return _dbTradings.CreateTradingDeal(request.Header.AuthKey?.Split('-')[0], request.Body?.Data, Conn);
+                        }
+                        // Trade (check for self trade, invalid user, invalid card)
+                        //Response = "afsdjk";
+                        break;
+                    case "DELETE":
+                        if (Conn != null) 
+                            return _dbTradings.DeleteTradingDeal(request.Header.Url.Split('/')[2], Conn);
+                        throw new Exception("Db not conn");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+            return CreateHttpResponse(HttpStatusCode.Accepted, "jlkagdn");
         }
     }
 }

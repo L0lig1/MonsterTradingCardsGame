@@ -4,6 +4,7 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.DBconn;
 using MonsterTradingCardsGame.DBconn.Tables;
 using MonsterTradingCardsGame.StoreNamespace;
+using Npgsql;
 using user;
 
 
@@ -11,71 +12,17 @@ using user;
 
 namespace MonsterTradingCardsGame
 {
-    class Program
+    internal class Program
     {
         public static void Main(String[] args)
         {
             var server = new Server();
             server.Listen();
-            //var hd = new ClientServer.Http.Response.HttpResponseHeader((HttpStatusCode)200, "application/json");
-            //var rp = hd.GetResponse();
+
+            //var d = new DbParent();
             //var db = new DB();
             //db.Connect();
-            ////db.AddCardToStack("Marcin", "2", db.Conn);
-            ////db.AddCardToStack("Marcin", "1", db.Conn);
-            //var br = new DbPackages();
-            //var p_id = br.SelectRandomP_id(db.Conn);
-            //var yo = br.GetPackage(p_id, db.Conn);
-            //var deleted = br.DeletePackage(p_id, db.Conn);
-
-            //db.Scoreboard();
-            //db.UpdateUserStats("Marcin", -100);
-            //db.UserStats("Marcin");
-
-            //db.CreateCard("845f0dc7-37d0-426e-994e-43fc3ac83c08", "WaterGoblin", 10, "Monster", "Water");
-
-            //var user1 = new User("User 1");
-            //var user2 = new User("User 2");
-            //Package package = null;
-            //var store = new Store();
-            //var choice = "A";
-            //
-            //Console.WriteLine("Welcome to MonsterTradingCardGame!");
-            //while (choice != "X")
-            //{
-            //    Console.WriteLine("(B)attle, (T)rade, (S)tore, e(X)it");
-            //    choice = Console.ReadLine();
-            //    switch (choice)
-            //    {
-            //        case "B":
-            //            Battle.Battle battle = new(user1, user2);
-            //            battle.CreateDecks();
-            //            battle.Fight();
-            //            break;
-            //        case "S":
-            //            package = store.BuyPackage(user1.Coins);
-            //            if (package != null)
-            //            {
-            //                user1.AddPackageToStack(package);
-            //            }
-            //            user1.PrintStack();
-            //            package = store.BuyPackage(user2.Coins);
-            //            if (package != null)
-            //            {
-            //                user2.AddPackageToStack(package);
-            //            }
-            //            user2.PrintStack();
-            //            break;
-            //        case "T":
-            //            break;
-            //        case "X":
-            //            Console.WriteLine("Thanks for playing MonsterTradingCardGame!");
-            //            break;
-            //        default: 
-            //            Console.WriteLine("Wrong Input");
-            //            break;
-            //    }
-            //}
+            //d.ExecQuery(d.Sql.Commands["LoginUser"],0, new string[,] { {"user", "kienboec"}, {"pw", "daniel" }}, db.Conn,false);
         }
     }
 }

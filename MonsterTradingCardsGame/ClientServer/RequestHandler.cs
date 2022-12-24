@@ -67,26 +67,7 @@ namespace MonsterTradingCardsGame.ClientServer
                     Response = _db.ScoreRoute(request);
                     break;
                 case "tradings":
-                    switch (request.Header.Method)
-                    {
-                        case "/GET":
-                            // check Trading deals
-                            //Response = "aöfs";
-                            break;
-                        case "/POST":
-                            if (request.Header.Url.Length == 1)
-                            {
-                                // Create Trading deal
-                                break;
-                            }
-                            // Trade (check for self trade, invalid user, invalid card)
-                            //Response = "afsdjk";
-                            break;
-                        case "/DELETE":
-                            //Response = "afsdlk";
-                            break;
-                    }
-                    //Response = "afdk";
+                    Response = _db.TradingsRoute(request);
                     break;
                 default:
                     Response = _db.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request");

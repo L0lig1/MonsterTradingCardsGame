@@ -4,9 +4,9 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    internal class DbUsers
+    internal class DbUsers : DbParent
     {
-        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
+        public new static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
         {
             return new HttpResponse
             {
@@ -15,27 +15,16 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             };
         }
 
-        public HttpResponse RegisterUser(string username, string password, NpgsqlConnection Conn)
+        public HttpResponse RegisterUser(string username, string password, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("INSERT INTO public.users(u_id, username, pw, coins, elo) " +
-                                                  "VALUES(default, @user, @pw, 20, 100); ", Conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@pw", password);
             try
             {
-                var worked = command.ExecuteNonQuery();
-                if (worked == 1)
-                {
-                    return CreateHttpResponse(HttpStatusCode.Created, "User has been registered");
-                }
-                else
-                {
-                    return CreateHttpResponse(HttpStatusCode.InternalServerError, "Problem occurred adding user!");
-                }
+                return ExecNonQuery(Sql.Commands["RegisterUser"], new[,]{ { "user", username }, { "pw", password } }, conn) 
+                    ? CreateHttpResponse(HttpStatusCode.Created, "User has been registered") 
+                    : CreateHttpResponse(HttpStatusCode.InternalServerError, "Problem occurred adding user!");
             }
             catch (Exception e)
             {
-                //return e.Message.Split(Environment.NewLine)[0].ToString();
                 if (e.Message.Split(':')[0] == "23505") // unique = user already there
                 {
                     //throw new Exception("POST Duplicate");
@@ -45,75 +34,40 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
-        public HttpResponse LoginUser(string username, string password, NpgsqlConnection Conn)
+        public HttpResponse LoginUser(string username, string password, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("SELECT username, pw " +
-                                                  "FROM users " +
-                                                  "WHERE username = @user " +
-                                                  "AND pw = @pw; ", Conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@pw", password);
-            command.Prepare();
             try
             {
-                var reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    reader.Close();
-                    return CreateHttpResponse(HttpStatusCode.OK, $"Welcome to MTCG, {username}!" + Environment.NewLine + "Here is your token: " + Environment.NewLine + $"{username}-mtcgToken");
-                }
-
-                reader.Close();
-                return CreateHttpResponse(HttpStatusCode.Unauthorized, "Login Failed!");
-
+                var response = ExecQuery(Sql.Commands["LoginUser"], 0, new[,] { { "user", username }, { "pw", password } }, conn, false);
+                return response.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, $"Login successful!{Environment.NewLine}Welcome to MTCG, {username}! Your token: {username}-mtcgToken")
+                    : CreateHttpResponse(HttpStatusCode.Unauthorized, "Login Failed!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Unauthorized, "Login Failed!");
-                //throw DuplicateNameException();
+                return CreateHttpResponse(HttpStatusCode.Unauthorized, "Login Failed! Error: " + e.Message);
             }
         }
         
-        // Fix this
-        public HttpResponse UpdateUser(string username, string name2, string bio, string img, NpgsqlConnection Conn)
+        public HttpResponse UpdateUser(string username, string name2, string bio, string img, NpgsqlConnection conn)
         {
-            using var command =
-                new NpgsqlCommand(
-                    "UPDATE public.users SET bio='adgda', image='@img', second_name='adagklg' WHERE username='Me';", Conn);
-            command.Parameters.AddWithValue("@name2", name2);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@bio", bio);
-            command.Parameters.AddWithValue("@img", img);
-
             try
             {
-                var reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    reader.Close();
-                    return CreateHttpResponse(HttpStatusCode.OK, "Update successful!");
-                }
-
-                reader.Close();
-                return CreateHttpResponse(HttpStatusCode.Conflict, "Update failed!");
+                return ExecNonQuery(Sql.Commands["UpdateUser"], new string[,] { { "newname", name2 }, { "user", username }, { "bio", bio }, { "img", img } }, conn) 
+                    ? CreateHttpResponse(HttpStatusCode.OK, "Update successful!")
+                    : CreateHttpResponse(HttpStatusCode.Conflict, "Update failed!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "Update failed!");
-                //throw DuplicateNameException();
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Update failed! Error: " + e.Message);
             }
         }
 
-        public bool UseCoins(string username, int coinToPay, NpgsqlConnection Conn)
+        public bool UseCoins(string username, int coinToPay, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("UPDATE users SET coins = ((SELECT coins FROM users WHERE username = @user) - @ctp) WHERE username = @user; ", Conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@ctp", coinToPay);
-
             try
             {
-                var worked = command.ExecuteNonQuery();
-                return worked == 1;
+                return ExecNonQuery(Sql.Commands["UseCoins"], new [,] { { "user", username }, { "ctp", coinToPay.ToString() } }, conn);
             }
             catch (Exception e)
             {
@@ -124,11 +78,9 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
-        public bool HasEnoughCoins(string username, NpgsqlConnection Conn)
+        public bool HasEnoughCoins(string username, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("SELECT coins " +
-                                                  "FROM users " +
-                                                  "WHERE username = @user ", Conn);
+            using var command = new NpgsqlCommand(Sql.Commands["HasEnoughCoins"], conn);
             command.Parameters.AddWithValue("@user", username);
             command.Prepare();
             try
@@ -151,13 +103,14 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.Message);
                 return false;
             }
         }
 
-        public HttpResponse UserStats(string username, NpgsqlConnection Conn)
+        public HttpResponse UserStats(string username, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("Select elo from users where username = @user;", Conn);
+            using var command = new NpgsqlCommand(Sql.Commands["UserStats"], conn);
             command.Parameters.AddWithValue("@user", username);
 
             try
@@ -177,41 +130,32 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, $"asfafsafasfafs");
+                return CreateHttpResponse(HttpStatusCode.Conflict, $"asfafsafasfafs" + e.Message);
                 //throw DuplicateNameException();
             }
         }
 
-        public HttpResponse UpdateUserStats(string username, int points, NpgsqlConnection Conn)
+        public HttpResponse UpdateUserStats(string username, int points, NpgsqlConnection conn)
         {
-            using var command =
-                new NpgsqlCommand(
-                    "UPDATE users SET elo = (Select elo from users where username = @user) + @pts WHERE username = @user; ",
-                    Conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@pts", points);
-
             try
             {
-                var worked = command.ExecuteNonQuery();
-                return worked == 1 
+                return ExecNonQuery(Sql.Commands["UpdateUserStats"], new string[,] { { "user", username }, { "pts", points.ToString() } }, conn)
                     ? CreateHttpResponse(HttpStatusCode.OK, "ELO has been changed")
                     : CreateHttpResponse(HttpStatusCode.Conflict, "Problem occurred while changing ELO!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "Problem occurred while changing ELO!");
-                //throw DuplicateNameException();
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Problem occurred while changing ELO!" + Environment.NewLine + "Error: " + e.Message);
             }
         }
 
-        public HttpResponse Scoreboard(NpgsqlConnection Conn)
+        public HttpResponse Scoreboard(NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("Select username, elo from users;", Conn);
+            using var command = new NpgsqlCommand("Select username, elo from users;", conn);
             try
             {
                 var reader = command.ExecuteReader();
-                string stack = "Username: ELO" + Environment.NewLine;
+                var stack = "Username: ELO" + Environment.NewLine;
                 while (reader.Read())
                 {
                     stack += reader.GetString(0) + ": " + reader.GetInt32(1) + Environment.NewLine;
@@ -223,28 +167,9 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga"); ;
+                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga" + e.Message); ;
             }
         }
 
-        public void SelectAllUsers(NpgsqlConnection Conn)
-        {
-            using var command = new NpgsqlCommand("Select * from users;", Conn);
-            try
-            {
-                var reader = command.ExecuteReader();
-                while (reader.Read())
-                {
-                    Console.WriteLine($"Reading from user id: {reader.GetInt32(0)}, {reader.GetString(1)}");
-                }
-
-                reader.Close();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                //throw DuplicateNameException();
-            }
-        }
     }
 }

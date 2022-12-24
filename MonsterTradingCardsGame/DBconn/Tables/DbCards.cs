@@ -6,21 +6,15 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    internal class DbCards
+    internal class DbCards : DbParent
     {
-        public bool CreateCard(string id, string name, int dmg, NpgsqlConnection Conn)
+        public bool CreateCard(string id, string name, int dmg, NpgsqlConnection conn)
         {
-
-            using var command = new NpgsqlCommand("INSERT INTO public.cards(name, damage, c_id) " +
-                                                  "VALUES(@name, @dmg, @id)", Conn);
-            command.Parameters.AddWithValue("@name", name);
-            command.Parameters.AddWithValue("@dmg", dmg);
-            command.Parameters.AddWithValue("@id", id);
             try
             {
-                var worked = command.ExecuteNonQuery();
-                Console.WriteLine(worked == 1 ? "Card has been added" : "Problem occurred adding card!");
-                return true;
+                return ExecNonQuery(Sql.Commands["CreateCard"], new[,]{ { "name", name }, { "dmg", dmg.ToString() }, { "c_id", id } }, conn) 
+                    ? true 
+                    : throw new Exception("AJKDBG");
             }
             catch (NpgsqlException e)
             {

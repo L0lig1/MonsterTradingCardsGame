@@ -10,22 +10,14 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DBconn.Tables
 {
-    public class DbStack
+    public class DbStack : DbParent
     {
-        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
-        {
-            return new HttpResponse
-            {
-                Header = new ClientServer.Http.Response.HttpResponseHeader(status, "text/plain", body.Length),
-                Body = new HttpResponseBody(body)
-            };
-        }
 
-        public HttpResponse ShowStack(string username, NpgsqlConnection Conn)
+        public HttpResponse ShowStack(string username, NpgsqlConnection conn)
         {
             using var command = new NpgsqlCommand("SELECT cards.name, stack.amount " +
-                                                  "FROM users JOIN stack ON users.u_id = stack.user_id JOIN cards ON cards.c_id = stack.card_id " +
-                                                  "WHERE stack.user_id = (SELECT u_id FROM users WHERE username = @user)", Conn);
+                                                  "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
+                                                  "WHERE stack.username = @user", conn);
             command.Parameters.AddWithValue("@user", username);
             command.Prepare();
             try
@@ -43,23 +35,15 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga"); ;
+                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga" + e.Message); ;
             }
         }
 
-        public HttpResponse AddCardToStack(string? username, string card_id, NpgsqlConnection Conn)
+        public HttpResponse AddCardToStack(string username, string cardId, NpgsqlConnection conn)
         {
-            // myb change u_id to username
-            using var command = new NpgsqlCommand("INSERT INTO public.stack(user_id, card_id, amount) " +
-                                                                           "VALUES((SELECT u_id " +
-                                                                                   "FROM users " +
-                                                                                   "WHERE username = @user), @card, 1)", Conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Parameters.AddWithValue("@card", card_id);
             try
             {
-                var worked = command.ExecuteNonQuery();
-                return worked == 1
+                return ExecNonQuery(Sql.Commands["AddCardToStack"], new [,]{ { "user", username }, { "card", cardId } }, conn)
                     ? CreateHttpResponse(HttpStatusCode.Created, $"Card has been added to {username}'s stack!")
                     : CreateHttpResponse(HttpStatusCode.Conflict, $"Problem occurred adding card to {username}'s stack!");
             }
@@ -67,34 +51,18 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             {
                 if (e.Message.Split(':')[0] == "23505") // unique = card already there
                 {
-                    using var c2 = new NpgsqlCommand("Update stack SET amount = (" +
-                                                                "SELECT amount " +
-                                                                "FROM stack JOIN users on stack.user_id = users.u_id " +
-                                                                "WHERE username = @user " +
-                                                                  "AND card_id = @card" +
-                                                            ") + 1 " +
-                                                            "WHERE user_id = (" +
-                                                                "SELECT u_id " +
-                                                                "FROM users " +
-                                                                "WHERE username = @user" +
-                                                            ") " +
-                                                              "AND card_id = @card", Conn);
-                    c2.Parameters.AddWithValue("@user", username);
-                    c2.Parameters.AddWithValue("@card", card_id);
                     try
                     {
-                        var worked = c2.ExecuteNonQuery();
-                        return worked == 1
+                        return ExecNonQuery(Sql.Commands["AddCardToStackDuplicate"], new string[,] { { "user", username }, { "card", cardId } }, conn)
                             ? CreateHttpResponse(HttpStatusCode.Created, $"Card has been added to {username}'s stack!")
                             : CreateHttpResponse(HttpStatusCode.Created, $"Problem occurred adding card to {username}'s stack!");
                     }
                     catch (Exception ee)
                     {
-
+                        return CreateHttpResponse(HttpStatusCode.Conflict, ee.Message.Split(Environment.NewLine)[0].ToString());
                     }
                 }
                 return CreateHttpResponse(HttpStatusCode.Conflict, e.Message.Split(Environment.NewLine)[0].ToString());
-                //throw DuplicateNameException();
             }
         }
     }

@@ -5,10 +5,8 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Request
     {
         private readonly string[] _validHttpMethods = { "GET", "POST", "PUT", "DELETE" };
         private readonly string[] _validAuthTypes = { "Basic" };
-
-        private string? _contentType;
         private string? _authType;
-        private string  _method = "def";
+        private string  _method = string.Empty;
         private string  _url = "def";
 
         public string Method

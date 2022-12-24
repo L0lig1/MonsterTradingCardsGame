@@ -18,19 +18,17 @@ namespace MonsterTradingCardsGame.ClientServer
         {
             const int port = 10001;
             var localAddr = IPAddress.Loopback; // localhost
-            TcpListener server = null;
+            var server = new TcpListener(localAddr, port);
             try
             {
 
                 // TcpListener server = new TcpListener(port);
-                server = new TcpListener(localAddr, port);
 
                 // Start listening for client requests.
                 server.Start();
 
                 // Buffer for reading data
-                Byte[] bytes = new Byte[256];
-                String data = null;
+                var bytes = new Byte[256];
 
                 // Enter the listening loop.
                 while (true)
@@ -39,24 +37,20 @@ namespace MonsterTradingCardsGame.ClientServer
 
                     // Perform a blocking call to accept requests.
                     // You could also use server.AcceptSocket() here.
-                    using TcpClient client = server.AcceptTcpClient();
+                    using var client = server.AcceptTcpClient();
                     Console.WriteLine("Connected!");
 
-                    data = null;
-
                     // Get a stream object for reading and writing
-                    NetworkStream stream = client.GetStream();
+                    var stream = client.GetStream();
 
-                    int i;
-                    var parser = new HttpParser();
-                    string recvData = " ";
+                    var i = 0;
+                    var recvData = " ";
 
                     // Loop to receive all the data sent by the client.
                     while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
                     {
                         // Translate data bytes to a ASCII string.
                         recvData += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        Console.WriteLine($"Received: {data}");
                         // end zeichen
                         if (i is not 0 and not 256)
                         {
@@ -68,11 +62,10 @@ namespace MonsterTradingCardsGame.ClientServer
                     var response = rh.HandleRequest(ParseHttpData(recvData));
                     
                     
-                    byte[] msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body.GetHttpBody());
+                    var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());
                     
                     // Send back a response.
                     stream.Write(msg, 0, msg.Length);
-                    Console.WriteLine($"Sent: {data}");
                 }
             }
             catch (SocketException e)

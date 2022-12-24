@@ -7,24 +7,22 @@ namespace MonsterTradingCardsGame.LogsManagement
     public class LogFileManagement
     {
 
-        private static string _fileName;
+        private static string _fileName = string.Empty;
 
         public LogFileManagement()
         {
             _fileName = @"C:\Users\Nahash\source\repos\MonsterTradingCardsGame\MonsterTradingCardsGame\LogsManagement\BattleLogs\" + DateTime.Now.ToString("yyyy-MM-dd hh-mm-ss") + ".log";
-            using (FileStream fs = File.Create(_fileName))
-            {
-                byte[] info = new UTF8Encoding(true).GetBytes($"New Battle on {DateTime.Now:yyyy-MM-dd hh:mm:ss}\n");
-                // Add some information to the file.
-                fs.Write(info, 0, info.Length);
-            }
+            using var fs = File.Create(_fileName);
+            var info = new UTF8Encoding(true).GetBytes($"New Battle on {DateTime.Now:yyyy-MM-dd hh:mm:ss}\n");
+            // Add some information to the file.
+            fs.Write(info, 0, info.Length);
         }
 
         public bool WriteLog(string strMessage)
         {
             try
             {                
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 sb.Append(strMessage);
                 File.AppendAllText(_fileName, sb.ToString());
                 sb.Clear();
@@ -33,6 +31,7 @@ namespace MonsterTradingCardsGame.LogsManagement
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }
@@ -41,19 +40,17 @@ namespace MonsterTradingCardsGame.LogsManagement
         {
             try
             {
-                using (StreamReader sr = File.OpenText(_fileName))
+                using var sr = File.OpenText(_fileName);
+                while (sr.ReadLine() is { } s)
                 {
-                    string s = "";
-                    while ((s = sr.ReadLine()) != null)
-                    {
-                        Console.WriteLine(s);
-                    }
-
-                    return true;
+                    Console.WriteLine(s);
                 }
+
+                return true;
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 return false;
             }
         }

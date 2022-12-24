@@ -13,8 +13,6 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Response
 
         public string GetResponse()
         {
-            var enumDisplayStatus = (HttpStatusCode)_statusCode;
-            var stringEnum = enumDisplayStatus.ToString();
             return $"HTTP/{_version} {(int)_statusCode} {_statusCode}" + Environment.NewLine +
                    $"Content-Type: {_contentType}" + Environment.NewLine +
                    $"Content-Length: {_contentLength}" + Environment.NewLine +
