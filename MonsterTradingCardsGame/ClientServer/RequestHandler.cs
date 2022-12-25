@@ -36,7 +36,7 @@ namespace MonsterTradingCardsGame.ClientServer
                 "cards"        => _router.CardsRoute(request),
                 "deck"         => _router.DeckRoute(request),
                 "stats"        => _router.StatsRoute(request),
-                "score"        => _router.ScoreRoute(request),
+                "score"        => _router.ScoreRoute(),
                 "tradings"     => _router.TradingsRoute(request),
                 _ => _router.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request")
             };

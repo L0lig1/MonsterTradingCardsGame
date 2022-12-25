@@ -11,6 +11,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 {
     public class DbTradings : DbHandler
     {
+        private DbStack _dbStack = new();
         private static string ParseTradingDeal(string td)
         {
             var resp = "";
@@ -25,11 +26,11 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             return resp;
         }
 
-        public HttpResponse CheckTradingDeal(NpgsqlConnection conn)
+        public HttpResponse GetTradingDeals(NpgsqlConnection conn)
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["CheckTradingDeal"], 5, null, conn, true);
+                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{5}, null, conn, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, ParseTradingDeal(resp.Item2))
                     : throw new Exception("There are no deals currently!");
@@ -44,6 +45,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
+                ExecNonQuery(Sql.Commands["LockCardForTrade"], new string[,] { { "user", user }, { "card", bodyData.CardToTrade } }, conn);
                 return ExecNonQuery(
                     Sql.Commands["CreateTradingDeal"],
                     new string[,]
@@ -59,7 +61,6 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             catch (Exception e)
             {
                 return CreateHttpResponse(HttpStatusCode.Conflict, "Trade deal could not be created because: " + e.Message);
-                //throw;
             }
         }
 
@@ -69,6 +70,78 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 ? CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Deleted successfully")
                 : CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while deleting trading deal");
         }
-        
+
+        public HttpResponse Trade(string tradeId, string t2CardToTrade, string t2User, NpgsqlConnection conn)
+        {
+            try
+            {
+
+                // get trading deal (if exists)
+                var tradee1  = ExecQuery(
+                    Sql.Commands["GetTradingDealById"], 
+                    5, 
+                    new[] {2,3},
+                    new[,] { { "tid", tradeId } }, 
+                    conn, 
+                    true
+                );
+                
+                // get cardToTrade (if exists)
+                var tradee2 = ExecQuery(
+                    Sql.Commands["GetCardFromStackById"], 
+                    4, 
+                    new []{2,3},
+                    new [,]{{"user", t2User}, {"card", t2CardToTrade}}, 
+                    conn, 
+                    true
+                );
+                
+                if (tradee1.Item1 == false || tradee2.Item1 == false)
+                {
+                    throw new Exception( "Trade offer or provided card does not exist!");
+                }
+
+                var trade1Split = tradee1.Item2.Split('@'); // user, ct, dmg, amount, c_id
+                var trade2Split = tradee2.Item2.Split('@'); // user, ct, dmg, amount
+
+                // check username
+                if (trade1Split[0] == trade2Split[0])
+                {
+                    throw new Exception( "Cannot trade with yourself!");
+                }
+
+                // check card type
+                if (trade1Split[1] != trade2Split[1])
+                {
+                    throw new Exception( $"Card types do not match! Card should be of {trade1Split[1]} type");
+                }
+
+                // check min dmg
+                if (int.Parse(trade2Split[2]) <= int.Parse(trade1Split[2]))
+                {
+                    throw new Exception( $"Minimum damage ({int.Parse(trade1Split[2])}) condition not satisfied.{Environment.NewLine}" +
+                                         $"Your card has: {trade2Split[2]} damage");
+                }
+
+                // if successful
+                // amount == 1 ? DELETE delete card from stack : amount - 1
+                _dbStack.RemoveCardFromStackById(trade1Split[4], trade1Split[0], int.Parse(trade1Split[3]), conn);
+                _dbStack.RemoveCardFromStackById(t2CardToTrade, t2User, int.Parse(trade2Split[3]), conn);
+
+                // add each card to each stack
+                _dbStack.AddCardToStack(trade1Split[0], t2CardToTrade, conn);
+                _dbStack.AddCardToStack(t2User, trade1Split[4], conn);
+
+                // delete Trading deal
+                DeleteTradingDeal(tradeId, conn);
+
+                return CreateHttpResponse(HttpStatusCode.OK, "Trade successful!");
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Conflict, $"Trade unsuccessful because of the following error: {Environment.NewLine}{e.Message}" );
+            }
+        }
+
     }
 }

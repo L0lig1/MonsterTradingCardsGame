@@ -74,7 +74,7 @@ namespace MonsterTradingCardsGame.DBconn
                 }
                 if (splitUrl.Length > 2 && request.Body != null && request.Body.Data == null)
                 {
-                    return _dbUser.GetUser(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
+                    return _dbUser.GetUserById(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
                 }
 
                 throw new Exception("Error!");
@@ -177,7 +177,7 @@ namespace MonsterTradingCardsGame.DBconn
             }
         }
 
-        public HttpResponse ScoreRoute(HttpRequest request)
+        public HttpResponse ScoreRoute()
         {
             try
             {
@@ -195,33 +195,34 @@ namespace MonsterTradingCardsGame.DBconn
         {
             try
             {
+                if (Conn == null) throw new Exception("Db not conn");
                 switch (request.Header.Method)
                 {
                     case "GET":
                         // check Trading deals
-                        if (Conn != null) return _dbTradings.CheckTradingDeal(Conn);
-                        throw new Exception("Db not conn");
+                        return _dbTradings.GetTradingDeals(Conn);
                     case "POST":
                         if (request.Header.Url == "/tradings")
                         {
                             return _dbTradings.CreateTradingDeal(request.Header.AuthKey?.Split('-')[0], request.Body?.Data, Conn);
                         }
                         // Trade (check for self trade, invalid user, invalid card)
-                        //Response = "afsdjk";
-                        break;
+                        var subUrl = request.Header.Url.Split('/');
+                        if (subUrl.Length == 3 && request.Body != null)
+                            return _dbTradings.Trade(subUrl[2], request.Body.Data?.ToString(), request.Header.User, Conn);
+                        throw new Exception("Invalid request!");
                     case "DELETE":
-                        if (Conn != null) 
-                            return _dbTradings.DeleteTradingDeal(request.Header.Url.Split('/')[2], Conn);
-                        throw new Exception("Db not conn");
+                        return _dbTradings.DeleteTradingDeal(request.Header.Url.Split('/')[2], Conn);
                 }
+
+                throw new Exception("Invalid request!");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
-            }
 
-            return CreateHttpResponse(HttpStatusCode.Accepted, "jlkagdn");
+                return CreateHttpResponse(HttpStatusCode.Conflict, "jlkagdn");
+            }
         }
 
         public HttpResponse DeckRoute(HttpRequest request)

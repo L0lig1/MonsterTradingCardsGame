@@ -64,6 +64,22 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
+        public bool RemoveCardFromStackById(string id, string user, int amount, NpgsqlConnection conn)
+        {
+            try
+            {
+                var resp = amount == 1
+                    ? ExecNonQuery(Sql.Commands["DeleteCardFromStack"], new[,] { { "user", user }, { "card", id } }, conn)
+                    : ExecNonQuery(Sql.Commands["DeleteCardFromStackDuplicate"], new[,] { { "user", user }, { "card", id } }, conn);
+                return resp ? resp : throw new Exception("Card could not be removed from stack!");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw new Exception(e.Message);
+            }
+        }
+
         public HttpResponse ConfigureDeck(string username, dynamic cards, NpgsqlConnection conn)
         {
             try
@@ -85,7 +101,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["GetDeck"], 1, new [,] { { "user", username } }, conn, true);
+                var resp = ExecQuery(Sql.Commands["GetDeck"], 1, null, new [,] { { "user", username } }, conn, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
                     : throw new Exception("User deck not found!");

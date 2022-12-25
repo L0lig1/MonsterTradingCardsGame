@@ -38,7 +38,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                var response = ExecQuery(Sql.Commands["LoginUser"], 0, new[,] { { "user", username }, { "pw", password } }, conn, false);
+                var response = ExecQuery(Sql.Commands["LoginUser"], 0,null, new[,] { { "user", username }, { "pw", password } }, conn, false);
                 return response.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, $"Login successful!{Environment.NewLine}Welcome to MTCG, {username}! Your token: {username}-mtcgToken")
                     : CreateHttpResponse(HttpStatusCode.Unauthorized, "Login Failed!");
@@ -168,11 +168,11 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
-        public HttpResponse GetUser(string userUrl, string userToken, NpgsqlConnection conn)
+        public HttpResponse GetUserById(string userUrl, string userToken, NpgsqlConnection conn)
         {
             try
             {
-                var response = ExecQuery(Sql.Commands["GetUser"], 7, new[,] { { "user", userUrl } }, conn, true);
+                var response = ExecQuery(Sql.Commands["GetUserById"], 7, null, new[,] { { "user", userUrl } }, conn, true);
                 return response.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, $"{userUrl}'s Profile: {Environment.NewLine}{response.Item2}")
                     : CreateHttpResponse(HttpStatusCode.Conflict, "User not found!");

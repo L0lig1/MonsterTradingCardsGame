@@ -11,36 +11,40 @@ namespace MonsterTradingCardsGame.ClientServer.Http
         public Request.HttpRequest ParseHttpData(string request)
         {
             string method = string.Empty, httpVersion = string.Empty, url = string.Empty;
-            string? authorizationKey = string.Empty, authorizationType = string.Empty;
+            string? authorizationKey = string.Empty, user = string.Empty, authorizationType = string.Empty;
             dynamic? data = null;
+            var headerOver = false;
             request = request.Trim();
             var requestSplit = request.Split(Environment.NewLine);
             try
             {
                 foreach (var line in requestSplit)
                 {
-                    if (!line.Contains(':') && !string.IsNullOrEmpty(line) && !line.Contains('['))
+                    if (!line.Contains(':') && !string.IsNullOrEmpty(line) && !headerOver)
                     {
                         httpVersion = GetFirstLine(line, "HTTP/")[1];
                         method = GetFirstLine(line, " ")[0];
-                        //Url = line.Split(' ')[1].Split('/').Skip(1).ToArray(); // Gets Url and seperates by '/'
                         url = GetFirstLine(line, " ")[1];
                     } 
-                    else if (line.Contains('{') || line.Contains('}') || line.Contains('[')) // data
+                    else if (headerOver || line.Contains('{') || line.Contains('}') || line.Contains('['))
                     {
                         // check for invalid JSON
                         data = GetData(line);
                     }
-                    else if (line.Contains("Authorization: "))
+                    else if (line == string.Empty)
                     {
-                        //authorizationUser = line.Split("Authorization: ")[1].Split(" ")[1].Split('-')[0];
-                        authorizationKey = GetAuthKey(line);
+                        headerOver = true;
+                    }
+                    else if (!headerOver && line.Contains("Authorization: "))
+                    {
                         authorizationType = GetAuthType(line);
+                        authorizationKey = GetAuthKey(line);
+                        user = GetAuthKey(line).Split('-')[0];
                     }
                 }
                 return new HttpRequest
                 {
-                    Header = new HttpRequestHeader(httpVersion, method, url, authorizationType, authorizationKey),
+                    Header = new HttpRequestHeader(httpVersion, method, url, authorizationType, authorizationKey, user),
                     Body = new HttpRequestBody(data)
                 };
             }
@@ -51,19 +55,19 @@ namespace MonsterTradingCardsGame.ClientServer.Http
             }
         }
 
-        private string[] GetFirstLine(string line, string delim)
+        private static string[] GetFirstLine(string line, string delim)
         {
             return line.Split(delim);
         }
-        public string GetAuthType(string line)
+        public static string GetAuthType(string line)
         {
             return line.Split("Authorization: ")[1].Split(" ")[0];
         }
-        public string GetAuthKey(string line)
+        public static string GetAuthKey(string line)
         {
             return line.Split("Authorization: ")[1].Split(" ")[1];
         }
-        public dynamic GetData(string line)
+        public static dynamic GetData(string line)
         {
             return JsonConvert.DeserializeObject<dynamic>(line) ?? throw new InvalidOperationException();
         }

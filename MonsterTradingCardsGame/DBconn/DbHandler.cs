@@ -54,25 +54,43 @@ namespace MonsterTradingCardsGame.DBconn
             }
         }
 
-        private static string GetQueryResponse(int queryRespSize, NpgsqlDataReader reader)
+        private static string GetQueryResponse(int queryRespSize, int[]? intIndexes, NpgsqlDataReader reader)
         {
-            var resp = string.Empty;
-            while (reader.Read())
+            try
             {
-                for (var i = 0; i < queryRespSize; i++)
+                var resp = string.Empty;
+                const string delim = "@";
+                while (reader.Read())
                 {
-                    resp += reader.GetString(i) + "@";
-                }
+                    for (var i = 0; i < queryRespSize; i++)
+                    {
+                        if (reader.IsDBNull(i))
+                        {
+                            resp += "null" + delim;
+                        }
+                        else
+                        {
+                            resp += intIndexes != null && intIndexes.Contains(i)
+                                ? reader.GetInt32(i) + delim
+                                : reader.GetString(i) + delim;
+                        }
+                    }
 
-                resp = resp.Remove(resp.Length - 1);
-                resp += Environment.NewLine;
+                    resp = resp.Remove(resp.Length - 1);
+                    resp += Environment.NewLine;
+                }
+                resp = resp.Remove(resp.Length - Environment.NewLine.Length);
+                reader.Close();
+                return resp;
             }
-            resp = resp.Remove(resp.Length - 2);
-            reader.Close();
-            return resp;
+            catch (Exception e)
+            {
+                reader.Close();
+                throw new Exception(e.Message);
+            }
         }
 
-        private static string GetUserResponse(NpgsqlDataReader reader)
+        private static string GetUserByIdResponse(NpgsqlDataReader reader)
         {
             if (!reader.Read()) throw new Exception("Could not get User data");
             var resp = $"Name:     {(reader.IsDBNull(6) ? "" : reader.GetString(6))}{Environment.NewLine}" + 
@@ -86,7 +104,7 @@ namespace MonsterTradingCardsGame.DBconn
             return resp;
         }
 
-        public (bool, string) ExecQuery(string cmd, int columnSize, string[,]? values, NpgsqlConnection conn, bool recvResp)
+        public (bool, string) ExecQuery(string cmd, int columnSize, int[]? intIndexes, string[,]? values, NpgsqlConnection conn, bool recvResp)
         {
             using var command = new NpgsqlCommand(cmd, conn);
             if (values != null) AddParamWithValue(command, values);
@@ -98,8 +116,8 @@ namespace MonsterTradingCardsGame.DBconn
                     command.Parameters.Clear();
                     return (true, recvResp 
                         ? (cmd.Contains("SELECT * FROM users") 
-                            ? GetUserResponse(reader) 
-                            : GetQueryResponse(columnSize, reader)) 
+                            ? GetUserByIdResponse(reader) 
+                            : GetQueryResponse(columnSize, intIndexes, reader)) 
                         : "");
                 }
 

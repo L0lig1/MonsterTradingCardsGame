@@ -27,7 +27,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["SelectRandomPackageId"], 1, null, conn, true);
+                var resp = ExecQuery(Sql.Commands["SelectRandomPackageId"], 1, null, null, conn, true);
                 return resp.Item1
                     ? resp.Item2
                     : throw new Exception("There are no packages in the store");
@@ -43,7 +43,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             try
             {
                 var pId = SelectRandomP_id(conn);
-                var resp = ExecQuery(Sql.Commands["GetPackage"], 2, new string[,]{{"p_id", pId } }, conn, true);
+                var resp = ExecQuery(Sql.Commands["GetPackage"], 2, null, new string[,]{{"p_id", pId } }, conn, true);
                 return resp.Item1
                     ? resp.Item2.Split(Environment.NewLine)
                     : throw new Exception("Could not get packages!");

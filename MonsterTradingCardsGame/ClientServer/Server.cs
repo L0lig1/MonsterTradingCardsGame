@@ -28,7 +28,8 @@ namespace MonsterTradingCardsGame.ClientServer
                 server.Start();
 
                 // Buffer for reading data
-                var bytes = new Byte[256];
+                const int bufferSize = 4096;
+                var bytes = new byte[bufferSize];
 
                 // Enter the listening loop.
                 while (true)
@@ -51,8 +52,8 @@ namespace MonsterTradingCardsGame.ClientServer
                     {
                         // Translate data bytes to a ASCII string.
                         recvData += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                        // end zeichen
-                        if (i is not 0 and not 256)
+                        // end zeichen (doesn't work when actual message == buffer size cz flag not init)
+                        if (i is not 0 and not bufferSize)
                         {
                             break;
                         }

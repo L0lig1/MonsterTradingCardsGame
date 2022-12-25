@@ -27,7 +27,7 @@ TODO:
         DONE DONE configure deck (delete when error in the middle)
     Battle
     Trade:
-        Trade
+        DONE DONE Trade (stack funktionen myb in DbStack?)
         DONE DONE check trading deals
         DONE DONE create trading deals
         DONE DONE delete trading deals

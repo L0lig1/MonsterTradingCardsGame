@@ -7,7 +7,8 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Request
         private readonly string[] _validAuthTypes = { "Basic" };
         private string? _authType;
         private string  _method = string.Empty;
-        private string  _url = "def";
+        private string  _url = string.Empty;
+        private string? _user = string.Empty;
 
         public string Method
         {
@@ -61,13 +62,24 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Request
 
         public string? AuthKey { get; set; }
 
-        public HttpRequestHeader(string httpVersion, string method, string url, string? authType, string? authKey)
+        public string? User
+        {
+            get => _user;
+            set
+            {
+                if (value != null) 
+                    _user = value;
+            }
+        }
+
+        public HttpRequestHeader(string httpVersion, string method, string url, string? authType, string? authKey, string? user)
         {
             HttpVersion = httpVersion;
             Method = method;
             Url = url;
             AuthType = authType;
             AuthKey = authKey;
+            User = user;
         }
     }
 }

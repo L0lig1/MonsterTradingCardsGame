@@ -26,6 +26,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 return false; // evtl throw
             }
         }
+        
 
     }
 }
