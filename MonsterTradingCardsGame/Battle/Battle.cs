@@ -44,6 +44,37 @@ namespace MonsterTradingCardsGame.Battle
             }
         }
 
+        public static int CalculateEloRating(int playerARating, int playerBRating, double score)
+        {
+            // Calculate the expected score for player A
+            double expectedScore = CalculateExpectedScore(playerARating, playerBRating);
+
+            // Determine the K factor to use based on the rating of player A
+            int kFactor = DetermineKFactor(playerARating);
+
+            // Calculate the rating change for player A
+            int ratingChange = (int)Math.Round(kFactor * (score - expectedScore));
+
+            // Return the updated rating for player A
+            return playerARating + ratingChange;
+        }
+
+        private static double CalculateExpectedScore(int playerARating, int playerBRating)
+        {
+            double denominator = 1 + Math.Pow(10, (playerBRating - playerARating) / 400.0);
+            return 1 / denominator;
+        }
+
+        private static int DetermineKFactor(int playerRating)
+        {
+            return playerRating switch
+            {
+                < 2100 => 32,
+                < 2400 => 24,
+                _ => 16
+            };
+        }
+
         public bool KnightVsWater()
         {
             //if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == "water")
@@ -124,7 +155,7 @@ namespace MonsterTradingCardsGame.Battle
             _user2CurrentCard = _user2.ReturnRandomCardFromDeck();
         }
 
-        public string Fight()
+        public (string, int, int) Fight()
         {
             Console.WriteLine($"{Environment.NewLine}THE FIGHT BEGINS!");
             int c1Damage, c2Damage;
@@ -161,6 +192,8 @@ namespace MonsterTradingCardsGame.Battle
 
             GameEnd();
             _log.WriteLog(_log.GetLog());
+            var U1Elo = CalculateEloRating(_user1.Elo, _user2.Elo, _user1.Deck.Count == 0 ? 0 : (_user2.Deck.Count == 0 ? 1 : 0.5));
+            var U2Elo = CalculateEloRating(_user2.Elo, _user1.Elo, _user2.Deck.Count == 0 ? 0 : (_user1.Deck.Count == 0 ? 1 : 0.5));
             return _log.GetLog();
         }
     }

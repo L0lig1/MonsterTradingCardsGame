@@ -11,6 +11,7 @@ namespace MonsterTradingCardsGame.ClientServer
         private const int Port = 10001;
         private static readonly IPAddress LocalAddr = IPAddress.Loopback; // localhost
         private readonly TcpListener _serverSocket = new (LocalAddr, Port);
+        private Dictionary<string, DateTime> _authorization = new();
 
         public void Start()
         {
@@ -39,7 +40,7 @@ namespace MonsterTradingCardsGame.ClientServer
             }
         }
 
-        private static void HandleClient(object ct)
+        private void HandleClient(object ct)
         {
             try
             {
@@ -70,7 +71,7 @@ namespace MonsterTradingCardsGame.ClientServer
                 }
                 // Process the data sent by the client.
                 var rh = new RequestHandler();
-                var response = rh.HandleRequest(ParseHttpData(recvData));
+                var response = rh.HandleRequest(ParseHttpData(recvData), _authorization);
                 
                 
                 var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());

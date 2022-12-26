@@ -15,13 +15,20 @@ namespace MonsterTradingCardsGame.ClientServer
     {
         private readonly Router _router = new ();
         public HttpResponse Response = new();
-        private Dictionary<string, string> _authorization = new();
+        private Dictionary<string, DateTime> _authorization = new();
 
-        // kleinere methoden
-
-
-        public HttpResponse HandleRequest(Http.Request.HttpRequest? request)
+        private bool IsAuthorized(string username)
         {
+            if (_authorization[username] > DateTime.Now)
+                return _authorization.ContainsKey(username) && _authorization[username] > DateTime.Now;
+
+            _authorization.Remove(username);
+            return false;
+        }
+
+        public HttpResponse HandleRequest(Http.Request.HttpRequest? request, Dictionary<string, DateTime> authorization)
+        {
+            _authorization = authorization;
             try
             {
                 _router.Connect();
@@ -30,18 +37,23 @@ namespace MonsterTradingCardsGame.ClientServer
                     return _router.CreateHttpResponse(HttpStatusCode.BadRequest, "Request failed");
                 }
 
-                Console.WriteLine(request.Header.Url.Split('/')[1]);
+                var splitUrl = request.Header.Url.Split('/');
 
-                if (request.Header.Url.Split('/')[1] != "sessions" && request.Header.Url.Split('/').Length != 2)
+                Console.WriteLine(splitUrl[1]);
+
+                if (splitUrl[1] != "sessions" && splitUrl[1] != "users")
                 {
-
+                    if (request.Header.User != null && !IsAuthorized(request.Header.User))
+                    {
+                        throw new Exception("User is not authorized! Log in or register!");
+                    }
                 }
 
-                Response = request.Header.Url.Split('/')[1] switch
+                Response = splitUrl[1] switch
                 {
                     "battles"      => _router.BattleRoute(request),
                     "users"        => _router.UserRoute(request),
-                    "sessions"     => _router.SessionRoute(request),
+                    "sessions"     => _router.SessionRoute(request, _authorization),
                     "packages"     => _router.PackagesRoute(request),
                     "transactions" => _router.TransactionsRoute(request),
                     "cards"        => _router.CardsRoute(request),
@@ -57,7 +69,7 @@ namespace MonsterTradingCardsGame.ClientServer
             catch (Exception e)
             {
                 _router.Disconnect();
-                return _router.CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request");
+                return _router.CreateHttpResponse(HttpStatusCode.Conflict, $"An error occured: {e.Message}");
             }
         }
     }

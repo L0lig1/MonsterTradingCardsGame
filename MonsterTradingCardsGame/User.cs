@@ -12,9 +12,11 @@ namespace user
     {
         public string Name;
         public List<Card> Deck;
+        public int Elo;
 
-        public User(string name, List<Card> deck)
+        public User(string name, List<Card> deck, int elo)
         {
+            Elo = elo;
             Name = name;
             Deck = deck;
         }

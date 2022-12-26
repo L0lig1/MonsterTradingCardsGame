@@ -111,9 +111,14 @@ namespace MonsterTradingCardsGame.DBconn
             }
         }
 
-        public HttpResponse SessionRoute(HttpRequest request)
+        public HttpResponse SessionRoute(HttpRequest request, Dictionary<string, DateTime> authorization)
         {
-            return _dbUser.LoginUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
+            HttpResponse resp = _dbUser.LoginUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
+            if (resp.Header.StatusCode == HttpStatusCode.OK)
+            {
+                authorization.Add(request.Body?.Data?.Username.ToString(), DateTime.Now.AddMinutes(59));
+            }
+            return resp;
         }
 
         public HttpResponse PackagesRoute(HttpRequest request)
@@ -279,8 +284,8 @@ namespace MonsterTradingCardsGame.DBconn
                 // thread should wait for other thread to come
                 // when other thread comes, exe battle
                 var dbStack = new DbStack();
-                var battle = new Battle.Battle(new User("kienboec", dbStack.GetDeck("kienboec", Conn)),
-                                               new User("altenhof", dbStack.GetDeck("altenhof", Conn)));
+                var battle = new Battle.Battle(new User("kienboec", dbStack.GetDeck("kienboec", Conn), 100),
+                                               new User("altenhof", dbStack.GetDeck("altenhof", Conn), 100));
                 var battleLog = battle.Fight();
                 /*
                  * Battle:
@@ -288,11 +293,9 @@ namespace MonsterTradingCardsGame.DBconn
                  * Get Decks 
                  * Fill Deck Class with Cards
                  *
-                 * 
-                 *
                  */
                 // when battle over, give result to each thread
-                return CreateHttpResponse(HttpStatusCode.OK, battleLog);
+                return CreateHttpResponse(HttpStatusCode.OK, battleLog.Item1);
             }
             catch (Exception e)
             {
