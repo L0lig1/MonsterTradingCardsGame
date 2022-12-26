@@ -8,7 +8,7 @@ namespace MonsterTradingCardsGame.ClientServer.Http
     internal class HttpParser
     {
 
-        public Request.HttpRequest ParseHttpData(string request)
+        public static Request.HttpRequest ParseHttpData(string request)
         {
             string method = string.Empty, httpVersion = string.Empty, url = string.Empty;
             string? authorizationKey = string.Empty, user = string.Empty, authorizationType = string.Empty;

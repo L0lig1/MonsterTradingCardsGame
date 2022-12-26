@@ -66,8 +66,8 @@ namespace MonsterTradingCardsGame.DBconn
 
             /* Cards */
             { 
-                "CreateCard", "INSERT INTO public.cards(name, damage, c_id) " +
-                                                "VALUES(@name, @dmg, @c_id)"
+                "CreateCard", "INSERT INTO public.cards(name, damage, c_id, cardtype, elemtype) " +
+                                                "VALUES(@name, @dmg, @c_id, @ct, @et)"
             },
             {
                 "GetCardById", "SELECT * " +
@@ -121,10 +121,16 @@ namespace MonsterTradingCardsGame.DBconn
             },
             /* Deck */ 
             {
-                "GetDeck", "SELECT cards.name "+
-                           "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
-                           "WHERE username = @user " +
-                            "AND deck = true"
+                "GetDeckOnlyCardName", "SELECT cards.name "+
+                                       "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
+                                       "WHERE username = @user " +
+                                        "AND deck = true"
+            },
+            {
+                "GetDeck", "SELECT cards.c_id, name, damage, elemtype, cardtype " +
+                            "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
+                            "WHERE username = @user " +
+                             "AND deck = true"
             },
             { 
                 "AddCardToDeck", "UPDATE stack " +

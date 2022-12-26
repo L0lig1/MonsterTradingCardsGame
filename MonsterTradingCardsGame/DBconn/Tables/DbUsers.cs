@@ -53,7 +53,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                return ExecNonQuery(Sql.Commands["UpdateUser"], new string[,] { { "newname", name2 }, { "user", username }, { "bio", bio }, { "img", img } }, conn) 
+                return ExecNonQuery(Sql.Commands["UpdateUser"], new [,] { { "newname", name2 }, { "user", username }, { "bio", bio }, { "img", img } }, conn) 
                     ? CreateHttpResponse(HttpStatusCode.OK, "Update successful!")
                     : CreateHttpResponse(HttpStatusCode.Conflict, "Update failed!");
             }

@@ -22,15 +22,14 @@ namespace MonsterTradingCardsGame.CardNamespace
             Id = id;
             Name = name;
             Damage = damage;
-            var rnd = new Random();
-            ElementType = ValidElementTypes[rnd.Next(0, 3)];
-            CardType = ValidElementTypes[rnd.Next(0, 2)];
+            ElementType = elementType; //ValidElementTypes[rnd.Next(0, 3)];
+            CardType = cardType;
         }
 
-        public string Name { get; set; }
+        public string Name { get => _id; set => _id = value; }
         public string Id { get; set; }
-        public string[] ValidElementTypes = { "Fire", "Water", "Normal" };
-        public string[] ValidCardTypes = { "Monster", "Spell" };
+        public string[] ValidElementTypes = new CardTypes().ValidElementTypes;
+        public string[] ValidCardTypes = new CardTypes().ValidCardTypes;
 
         public string CardType   
         {
@@ -78,7 +77,7 @@ namespace MonsterTradingCardsGame.CardNamespace
 
         public string PrintCard()
         {
-            return $"{Name} ({ElementType} type) ({Damage} damage)";
+            return $"Name: {Name} Element type: {ElementType} Card type: {CardType} Damage: {Damage}";
         }
     }
 }

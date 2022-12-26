@@ -32,7 +32,7 @@ TODO:
         DONE DONE create trading deals
         DONE DONE delete trading deals
     Authorization
-    Card+Monster type
+    DONE DONE Card+Monster type
 - Optional:
     Win/Lose Ratio
     ELO myb?

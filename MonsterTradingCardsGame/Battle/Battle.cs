@@ -14,55 +14,44 @@ namespace MonsterTradingCardsGame.Battle
     
     class Battle
     {
-        private int round;
+        private int _round = 0;
         private readonly User _user1;
         private readonly User _user2;
         private Card _user1CurrentCard;
         private Card _user2CurrentCard;
-        private LogFileManagement _log = new();
+        private readonly LogFileManagement _log = new();
 
         public Battle(User user1, User user2)
         {
-            this._user1 = user1;
-            this._user2 = user2;
-            this.round = 0;
-        }
-
-        public void CreateDecks()
-        {
-            _user1.CustomOrRandomDeck();
-            Console.WriteLine($"Congrats {_user1.Name}, you created a Deck!");
-            _user1.PrintDeck();
-            _user2.CustomOrRandomDeck();
-            Console.WriteLine($"Congrats {_user2.Name}, you created a Deck!");
-            _user2.PrintDeck();
+            _user1 = user1;
+            _user2 = user2;
         }
 
         public static int CalculateDmgElementType(Card attackingCard, Card defendingCard)
         {
-            //switch (attackingCard.ElementType)
-            //{
-            //    case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Water:
-            //    case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
-            //    case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
-            //        return attackingCard.Damage / 2;
-            //    case (int)ElementTypeEnum.Water  when defendingCard.ElementType == (int)ElementTypeEnum.Fire:
-            //    case (int)ElementTypeEnum.Fire   when defendingCard.ElementType == (int)ElementTypeEnum.Normal:
-            //    case (int)ElementTypeEnum.Normal when defendingCard.ElementType == (int)ElementTypeEnum.Water:
-            //        return attackingCard.Damage * 2;
-            //    default:
+            switch (attackingCard.ElementType)
+            {
+                case "Fire"   when defendingCard.ElementType == "Water":
+                case "Normal" when defendingCard.ElementType == "Fire":
+                case "Water"  when defendingCard.ElementType == "Normal":
+                    return attackingCard.Damage / 2;
+                case "Water"  when defendingCard.ElementType == "Fire":
+                case "Fire"   when defendingCard.ElementType == "Normal":
+                case "Normal" when defendingCard.ElementType == "Water":
+                    return attackingCard.Damage * 2;
+                default:
                     return attackingCard.Damage;
-            //}
+            }
         }
 
         public bool KnightVsWater()
         {
-            //if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == (int)ElementTypeEnum.Water)
+            //if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == "water")
             //{
             //    FightResult(_user2, _user2CurrentCard, 0, _user1, _user1CurrentCard, 0, true);
             //    return true;
             //}
-            //if (_user2CurrentCard.Name == "Knight" && _user1CurrentCard.ElementType == (int)ElementTypeEnum.Water)
+            //if (_user2CurrentCard.Name == "Knight" && _user1CurrentCard.ElementType == "water")
             //{
             //    FightResult(_user1, _user1CurrentCard, 0, _user2, _user2CurrentCard, 0, true);
             //    return true;
@@ -71,100 +60,80 @@ namespace MonsterTradingCardsGame.Battle
             return false;
         }
 
-        public int CalculateDamage(Card attackingCard, Card defendingCard)
+        public static int CalculateDamage(Card attackingCard, Card defendingCard)
         {
-            //if
-            //(
-            //    (attackingCard.CardType == (int)CardTypeEnum.Monster && defendingCard.CardType == (int)CardTypeEnum.Monster) ||
-            //    (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
-            //    (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
-            //    (defendingCard.Name == "Kraken"  && attackingCard.CardType == (int)CardTypeEnum.Spell) ||
-            //    (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
-            //)
-            //{
-            //    return attackingCard.Damage;
-            //}
+            if
+            (
+                (attackingCard.CardType == "Monster" && defendingCard.CardType == "Monster") ||
+                (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
+                (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
+                (defendingCard.Name == "Kraken"  && attackingCard.CardType == "Spell") ||
+                (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
+            )
+            {
+                return attackingCard.Damage;
+            }
 
             return CalculateDmgElementType(attackingCard, defendingCard);
         }
 
         public void GameEnd()
         {
-            if (_user2._deck.Length() == 0)
+            if (_user1.Deck.Count == 0 || _user2.Deck.Count == 0)
             {
-                _log.WriteLog($"\nUser 1 WINS!\nRounds played: {round}");
-            }
-            else if (_user1._deck.Length() == 0)
-            {
-                _log.WriteLog($"\nUser 2 WINS!\nRounds played: {round}");
+                _log.Log($"{Environment.NewLine}{(_user1.Deck.Count == 0 ? _user2.Name : _user1.Name)} WINS!" +
+                         $"{Environment.NewLine}Rounds played: {_round}{Environment.NewLine}");
             }
             else
             {
-                _log.WriteLog($"\nGame ended after {round} rounds. It's a draw!");
+                _log.Log($"{Environment.NewLine}Game ended after {_round} rounds. It's a draw!");
             }
         }
 
-        public void FightResult(User winnerUser, Card winnerCard, int wDmg, User loserUser, Card loserCard, int lDmg, bool knightDrown)
+        public void FightResult(User winnerUser, Card winnerCard, int user1TotalDmg, User loserUser, Card loserCard, int user2TotalDmg, bool knightDrown)
         {
-            loserUser._deck.RemoveFromDeck(loserCard);
-            winnerUser._deck.AddToDeck(loserCard);
-            if(winnerUser == _user1 && !knightDrown)
-                _log.WriteLog($" -> {wDmg} VS {lDmg} => {winnerCard.Name} defeats {loserCard.Name}\n");            
-            else if(winnerUser == _user2 && !knightDrown)
-                _log.WriteLog($" -> {lDmg} VS {wDmg} => {winnerCard.Name} defeats {loserCard.Name}\n");
-            else
-                _log.WriteLog(" => Knight drowned from in the water (spell)\n");
+            loserUser.Deck.Remove(loserCard);
+            winnerUser.Deck.Add(loserCard);
+            _log.Log(
+                knightDrown
+                ? $" => Knight drowned from in the water (spell){Environment.NewLine}"
+                : $" -> {user1TotalDmg} VS {user2TotalDmg} => {winnerCard.Name} defeats {loserCard.Name}{Environment.NewLine}"
+            );
         }
 
         public void PrintCurrentCards()
         {
-            _log.WriteLog(
-                (round == 1 ? "\n" : "") + 
-                $"Round {round}\n" +
-                _user1.Name + ": " + _user1CurrentCard.PrintCard() + " vs " +
-                _user2.Name + ": " + _user2CurrentCard.PrintCard() + " => " + 
-                _user1CurrentCard.Damage + " VS " + _user2CurrentCard.Damage
+            _log.Log(
+                $"Round {_round}{Environment.NewLine}" +
+                $"{_user1.Name}: {_user1CurrentCard.PrintCard()} vs " +
+                $"{_user2.Name}: {_user2CurrentCard.PrintCard()} => " + 
+                $"{_user1CurrentCard.Damage} VS {_user2CurrentCard.Damage}"
             );
         }
 
-        public void PrintDecks()
+        public void PrintDecks(string deckBeforeOrAfterFight)
         {
-            string deck = _user1._deck.Length() > 0 && _user2._deck.Length() > 0 
-                          ? $"\nBattle between {_user1.Name} and {_user2.Name}\nDecks before the fight" 
-                          : "\nDecks after the fight";
-            
-            deck += $"\n{_user1.Name}'s deck:\n";
-            for (int i = 0; i < _user1._deck.Length(); i++)
-            {
-                deck += _user1._deck.ReturnDeckAtIndex(i).PrintCard() + "\n";
-            }           
-                        
-            deck += $"\n{_user2.Name}'s deck:\n";
-            for (int i = 0; i < _user2._deck.Length(); i++)
-            {           
-                deck += _user2._deck.ReturnDeckAtIndex(i).PrintCard() + "\n";
-            }
-
-            _log.WriteLog(deck);
-            
-            //Console.WriteLine("\nUser 1 Deck");
-            //_user1.PrintDeck();
-            //Console.WriteLine("\nUser 2 Deck");
-            //_user2.PrintDeck();
+            _log.Log($"{Environment.NewLine}Decks {deckBeforeOrAfterFight} the fight{Environment.NewLine}" +
+                     $"{Environment.NewLine}{_user1.Name}'s deck:{Environment.NewLine}{_user1.PrintDeck()}" +
+                     $"{Environment.NewLine}{_user2.Name}'s deck:{Environment.NewLine}{_user2.PrintDeck()}");
         }
 
-        public void Fight()
+        public void SetRandomCards()
         {
-            Console.WriteLine("\nTHE FIGHT BEGINS!");
+            _user1CurrentCard = _user1.ReturnRandomCardFromDeck();
+            _user2CurrentCard = _user2.ReturnRandomCardFromDeck();
+        }
+
+        public string Fight()
+        {
+            Console.WriteLine($"{Environment.NewLine}THE FIGHT BEGINS!");
             int c1Damage, c2Damage;
-            PrintDecks();
+            PrintDecks("before");
 
-            while (_user1._deck.Length() > 0 && _user2._deck.Length() > 0 && round <= 100)
+            while (_user1.Deck.Count > 0 && _user2.Deck.Count > 0 && _round <= 100)
             {
-                round++;
-                _user1CurrentCard = _user1.ReturnRandomCardFromDeck();
-                _user2CurrentCard = _user2.ReturnRandomCardFromDeck();
-
+                _round++;
+                SetRandomCards();
                 PrintCurrentCards();
 
                 if (KnightVsWater())
@@ -183,15 +152,16 @@ namespace MonsterTradingCardsGame.Battle
                 }
                 else
                 {
-                    _log.WriteLog(" => Draw!\n");
+                    _log.Log($" => Draw!{Environment.NewLine}");
                 }
 
             }
 
-            PrintDecks();
+            PrintDecks("after");
 
             GameEnd();
-            _log.ReadLog();
+            _log.WriteLog(_log.GetLog());
+            return _log.GetLog();
         }
     }
 

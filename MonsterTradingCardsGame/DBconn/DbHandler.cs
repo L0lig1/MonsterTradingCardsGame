@@ -40,10 +40,10 @@ namespace MonsterTradingCardsGame.DBconn
             try
             {
                 var worked = command.ExecuteNonQuery();
-                if (worked <= 0)
-                {
-                    throw new Exception("Error: ");
-                }
+                //if (worked <= 0)
+                //{
+                //    throw new Exception("Error: Query not successful");
+                //}
                 //return CreateHttpResponse(HttpStatusCode.OK, "Could not create package!");
                 return true;
 

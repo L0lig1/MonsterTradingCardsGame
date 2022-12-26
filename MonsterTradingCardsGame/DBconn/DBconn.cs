@@ -3,6 +3,9 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.DBconn.Tables;
 using Npgsql;
 using System.Net;
+using System.Threading;
+using MonsterTradingCardsGame.CardNamespace;
+using user;
 
 namespace MonsterTradingCardsGame.DBconn
 {
@@ -16,22 +19,45 @@ namespace MonsterTradingCardsGame.DBconn
         private readonly DbStack _dbStack = new();
 
 
-        private const string ConnString = "Server=127.0.0.1;" +
-                                          "Username=postgres;" +
-                                          "Database=MonterTradingCardGame;" +
-                                          "Port=5432;" +
-                                          "Password=bruhchungus;" +
-                                          "SSLMode=Prefer";
+        private const string Server = "127.0.0.1";
+        private const string Username = "postgres";
+        private const string Database = "MonterTradingCardGame";
+        private const string Port = "5432";
+        private const string Password = "bruhchungus";
+        private const string SSLMode = "Prefer";
 
         public NpgsqlConnection? Conn;
 
-
+        public void TruncateAll()
+        {
+            var db = new DbHandler();
+            Connect();
+            if (
+                db.ExecNonQuery("TRUNCATE TABLE cards", null, Conn) &&
+                db.ExecNonQuery("TRUNCATE TABLE packages", null, Conn) &&
+                db.ExecNonQuery("TRUNCATE TABLE stack", null, Conn) &&
+                db.ExecNonQuery("TRUNCATE TABLE trading", null, Conn) &&
+                db.ExecNonQuery("TRUNCATE TABLE users", null, Conn))
+            {
+                Console.WriteLine("ALL TABLES TRUNCATED");
+            }
+            else
+            {
+                Console.WriteLine("PROBLEM TRUNCATING TABLES");
+            }
+            Disconnect();
+        }
 
         public void Connect()
         {
             try
             {
-                Conn = new NpgsqlConnection(ConnString);
+                Conn = new NpgsqlConnection($"Server={Server};" +
+                                            $"Username={Username};" +
+                                            $"Database={Database};" +
+                                            $"Port={Port};" +
+                                            $"Password={Password};" +
+                                            $"SSLMode={SSLMode}");
                 Console.Out.WriteLine("Opening connection");
                 Conn.Open();
                 Console.WriteLine("Connected!");
@@ -76,7 +102,6 @@ namespace MonsterTradingCardsGame.DBconn
                 {
                     return _dbUser.GetUserById(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
                 }
-
                 throw new Exception("Error!");
             }
             catch (Exception e)
@@ -227,15 +252,14 @@ namespace MonsterTradingCardsGame.DBconn
 
         public HttpResponse DeckRoute(HttpRequest request)
         {
-            var username = request.Header.AuthKey?.Split('-')[0];
             try
             {
                 if (request.Body != null && request.Body.Data != null)
                 {
-                    return _dbStack.ConfigureDeck(username, request.Body?.Data, Conn); // configure deck
+                    return _dbStack.ConfigureDeck(request.Header.User, request.Body?.Data, Conn); // configure deck
                 }
 
-                if (username != null && Conn != null) return _dbStack.GetDeck(username, Conn);
+                if (request.Header.User != null && Conn != null) return _dbStack.GetDeckOnlyCardNames(request.Header.User, Conn);
                 //Response = data.Split('?').Length == 1 ?
                 // Show Deck
                 //"akfjdsb" : "aflkds"; // Show Different representation
@@ -245,6 +269,34 @@ namespace MonsterTradingCardsGame.DBconn
             {
                 Console.WriteLine(e);
                 throw;
+            }
+        }
+
+        public HttpResponse BattleRoute(HttpRequest request)
+        {
+            try
+            {
+                // thread should wait for other thread to come
+                // when other thread comes, exe battle
+                var dbStack = new DbStack();
+                var battle = new Battle.Battle(new User("kienboec", dbStack.GetDeck("kienboec", Conn)),
+                                               new User("altenhof", dbStack.GetDeck("altenhof", Conn)));
+                var battleLog = battle.Fight();
+                /*
+                 * Battle:
+                 * 2 User class
+                 * Get Decks 
+                 * Fill Deck Class with Cards
+                 *
+                 * 
+                 *
+                 */
+                // when battle over, give result to each thread
+                return CreateHttpResponse(HttpStatusCode.OK, battleLog);
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message);
             }
         }
     }

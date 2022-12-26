@@ -8,6 +8,7 @@ namespace MonsterTradingCardsGame.LogsManagement
     {
 
         private static string _fileName = string.Empty;
+        private string _log = $"New Battle on {DateTime.Now:yyyy-MM-dd hh:mm:ss}{Environment.NewLine}";
 
         public LogFileManagement()
         {
@@ -16,6 +17,16 @@ namespace MonsterTradingCardsGame.LogsManagement
             var info = new UTF8Encoding(true).GetBytes($"New Battle on {DateTime.Now:yyyy-MM-dd hh:mm:ss}\n");
             // Add some information to the file.
             fs.Write(info, 0, info.Length);
+        }
+
+        public void Log(string toLog)
+        {
+            _log += toLog;
+        }
+
+        public string GetLog()
+        {
+            return _log;
         }
 
         public bool WriteLog(string strMessage)

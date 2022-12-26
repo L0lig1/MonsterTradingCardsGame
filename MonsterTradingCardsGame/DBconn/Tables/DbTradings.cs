@@ -30,7 +30,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{5}, null, conn, true);
+                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{4}, null, conn, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, ParseTradingDeal(resp.Item2))
                     : throw new Exception("There are no deals currently!");

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-
+using MonsterTradingCardsGame.CardNamespace;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
@@ -97,18 +97,38 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             }
         }
 
-        public HttpResponse GetDeck(string username, NpgsqlConnection conn)
+        public HttpResponse GetDeckOnlyCardNames(string username, NpgsqlConnection conn)
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["GetDeck"], 1, null, new [,] { { "user", username } }, conn, true);
-                return resp.Item1
+                var resp = ExecQuery(Sql.Commands["GetDeckOnlyCardName"], 1, null, new [,] { { "user", username } }, conn, true);
+                return resp.Item1 
                     ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
                     : throw new Exception("User deck not found!");
             }
             catch (Exception e)
             {
                 return CreateHttpResponse(HttpStatusCode.Conflict, "Error retrieving deck: " + e.Message);
+            }
+        }
+
+        public List<Card> GetDeck(string username, NpgsqlConnection conn)
+        {
+            try
+            {
+                var resp = ExecQuery(Sql.Commands["GetDeck"], 5, new []{2}, new[,] { { "user", username } }, conn, true);
+                var cards = resp.Item2.Split(Environment.NewLine);
+                var listOfCards = new List<Card>();
+                foreach (var card in cards)
+                {
+                    var cardInfo = card.Split('@');
+                    listOfCards.Add(new Card(cardInfo[0], cardInfo[1], int.Parse(cardInfo[2]), cardInfo[3], cardInfo[4]));
+                }
+                return listOfCards;
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Error retrieving deck: " + e.Message);
             }
         }
     }
