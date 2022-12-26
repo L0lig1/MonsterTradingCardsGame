@@ -283,10 +283,15 @@ namespace MonsterTradingCardsGame.DBconn
             {
                 // thread should wait for other thread to come
                 // when other thread comes, exe battle
-                var dbStack = new DbStack();
-                var battle = new Battle.Battle(new User("kienboec", dbStack.GetDeck("kienboec", Conn), 100),
-                                               new User("altenhof", dbStack.GetDeck("altenhof", Conn), 100));
+                var celo1 = int.Parse(_dbUser.UserStats("kienboec", Conn).Body?.Data);
+                var celo2 = int.Parse(_dbUser.UserStats("altenhof", Conn).Body?.Data);
+                
+                var battle = new Battle.Battle(new User("kienboec", _dbStack.GetDeck("kienboec", Conn), celo1),
+                                               new User("altenhof", _dbStack.GetDeck("altenhof", Conn), celo2));
                 var battleLog = battle.Fight();
+                Console.WriteLine(battleLog.Item1 + Environment.NewLine + battleLog.Item2 + Environment.NewLine + battleLog.Item3);
+                _dbUser.UpdateUserStats("kienboec", battleLog.Item2, Conn);
+                _dbUser.UpdateUserStats("altenhof", battleLog.Item3, Conn);
                 /*
                  * Battle:
                  * 2 User class

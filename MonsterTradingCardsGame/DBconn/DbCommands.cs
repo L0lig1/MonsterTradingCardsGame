@@ -52,11 +52,7 @@ namespace MonsterTradingCardsGame.DBconn
             },
             { 
                 "UpdateUserStats", "UPDATE users " +
-                                   "SET elo = (" +
-                                       "SELECT elo " +
-                                       "FROM users " +
-                                       "WHERE username = @user" +
-                                   ") + @pts " +
+                                   "SET elo = @pts " +
                                    "WHERE username = @user; "
             },
             { 

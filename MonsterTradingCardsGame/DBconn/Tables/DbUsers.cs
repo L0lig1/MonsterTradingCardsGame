@@ -107,28 +107,16 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public HttpResponse UserStats(string username, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand(Sql.Commands["UserStats"], conn);
-            command.Parameters.AddWithValue("@user", username);
-
             try
             {
-                var reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-
-                    while (reader.Read())
-                    {
-                        return CreateHttpResponse(HttpStatusCode.OK, $"{username} has {reader.GetInt32(0)} points");
-                    }   
-                }
-
-                reader.Close();
-                return CreateHttpResponse(HttpStatusCode.Conflict, "User not found");
+                var response = ExecQuery(Sql.Commands["UserStats"], 1, new []{0}, new[,] { { "user", username } }, conn, true);
+                return response.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, response.Item2)
+                    : CreateHttpResponse(HttpStatusCode.Conflict, "User not found!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, $"asfafsafasfafs" + e.Message);
-                //throw DuplicateNameException();
+                return CreateHttpResponse(HttpStatusCode.Conflict, "asfafsafasfafs" + e.Message);
             }
         }
 

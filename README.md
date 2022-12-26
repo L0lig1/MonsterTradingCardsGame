@@ -26,6 +26,12 @@ TODO:
         show deck different representation (was?)
         DONE DONE configure deck (delete when error in the middle)
     Battle
+        DONE DONE ELO bekommen
+        DONE DONE User info bekommen
+        DONE DONE Battle starten und response zurückgeben
+        DONE DONE ELO nachm battle
+        TODO schau errors
+        TODO Deck nach dem Spiel an das Gewinner geben 
     Trade:
         DONE DONE Trade (stack funktionen myb in DbStack?)
         DONE DONE check trading deals
@@ -42,5 +48,9 @@ TODO:
     Package already exists
     Better error msg on 14)
     Invalid request being printed twice?
+
+    should fail and show original from before:
+    The provided cards have been added to altenhof's deck!
+    dragon 50 fire monster vs waterspell 20 water spell => waterspell won
 
      

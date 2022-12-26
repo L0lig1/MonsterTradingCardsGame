@@ -77,7 +77,7 @@ namespace MonsterTradingCardsGame.CardNamespace
 
         public string PrintCard()
         {
-            return $"Name: {Name} Element type: {ElementType} Card type: {CardType} Damage: {Damage}";
+            return $"{Name} ({Damage}) ({CardType}) ({ElementType})";
         }
     }
 }

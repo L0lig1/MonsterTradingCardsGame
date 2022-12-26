@@ -14,7 +14,7 @@ namespace MonsterTradingCardsGame.Battle
     
     class Battle
     {
-        private int _round = 0;
+        private int _round = 1;
         private readonly User _user1;
         private readonly User _user2;
         private Card _user1CurrentCard;
@@ -163,7 +163,6 @@ namespace MonsterTradingCardsGame.Battle
 
             while (_user1.Deck.Count > 0 && _user2.Deck.Count > 0 && _round <= 100)
             {
-                _round++;
                 SetRandomCards();
                 PrintCurrentCards();
 
@@ -186,6 +185,7 @@ namespace MonsterTradingCardsGame.Battle
                     _log.Log($" => Draw!{Environment.NewLine}");
                 }
 
+                _round++;
             }
 
             PrintDecks("after");
@@ -194,7 +194,7 @@ namespace MonsterTradingCardsGame.Battle
             _log.WriteLog(_log.GetLog());
             var U1Elo = CalculateEloRating(_user1.Elo, _user2.Elo, _user1.Deck.Count == 0 ? 0 : (_user2.Deck.Count == 0 ? 1 : 0.5));
             var U2Elo = CalculateEloRating(_user2.Elo, _user1.Elo, _user2.Deck.Count == 0 ? 0 : (_user1.Deck.Count == 0 ? 1 : 0.5));
-            return _log.GetLog();
+            return (_log.GetLog(), U1Elo, U2Elo);
         }
     }
 
