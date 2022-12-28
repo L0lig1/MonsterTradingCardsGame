@@ -15,25 +15,16 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public HttpResponse ShowStack(string username, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("SELECT cards.name, stack.amount " +
-                                                  "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
-                                                  "WHERE stack.username = @user", conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Prepare();
             try
             {
-                var reader = command.ExecuteReader();
-                var stack = "Card Name: amount" + Environment.NewLine;
-                while (reader.Read())
-                {
-                    stack += reader.GetString(0) + ": " + reader.GetInt32(1) + Environment.NewLine;
-                }
-                reader.Close();
-                return CreateHttpResponse(HttpStatusCode.OK, stack);
+                var resp = ExecQuery(Sql.Commands["ShowStack"], 2, new[] { 1 }, new string[,] { { "user", username } }, conn, true);
+                return resp.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
+                    : throw new Exception("Stack could not be shown");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga" + e.Message); ;
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Error while showing stack" + e.Message); ;
             }
         }
 

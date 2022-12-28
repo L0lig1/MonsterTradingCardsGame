@@ -77,25 +77,14 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public bool HasEnoughCoins(string username, NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand(Sql.Commands["HasEnoughCoins"], conn);
-            command.Parameters.AddWithValue("@user", username);
-            command.Prepare();
             try
             {
-                var reader = command.ExecuteReader();
-                while (reader.Read())
+                var response = ExecQuery(Sql.Commands["HasEnoughCoins"], 1, new[] { 0 }, new[,] { { "user", username } }, conn, true);
+                if (response.Item1 && int.Parse(response.Item2) >= 5)
                 {
-                    var coins = reader.GetInt32(0);
-                    if (coins >= 5)
-                    {
-                        reader.Close();
-                        return true;
-                    }
-
+                    return response.Item1;
                 }
-
-                reader.Close();
-                throw new Exception("Not enough coins!");
+                throw new Exception("Username could not be found");
 
             }
             catch (Exception e)
@@ -136,23 +125,17 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public HttpResponse Scoreboard(NpgsqlConnection conn)
         {
-            using var command = new NpgsqlCommand("Select username, elo from users;", conn);
             try
             {
-                var reader = command.ExecuteReader();
-                var stack = "Username: ELO" + Environment.NewLine;
-                while (reader.Read())
-                {
-                    stack += reader.GetString(0) + ": " + reader.GetInt32(1) + Environment.NewLine;
-                }
-
-                reader.Close();
-                return CreateHttpResponse(HttpStatusCode.OK, stack);
+                var resp = ExecQuery(Sql.Commands["Scoreboard"], 2, new[] { 1 }, null, conn, true);
+                return resp.Item1
+                    ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
+                    : throw new Exception("Query failed");
 
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "agdhfdsfgsdfga" + e.Message); ;
+                return CreateHttpResponse(HttpStatusCode.Conflict, "Scoreboard Error: " + e.Message); ;
             }
         }
 

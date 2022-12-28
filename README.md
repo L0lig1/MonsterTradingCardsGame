@@ -4,8 +4,8 @@ TODO:
 - Threads
 - Unit Tests
 - Handling vereinheitlichen:
-    SELECT multirow 
-    SELECT 1 row
+    DONE DONE SELECT multirow 
+    DONE DONE SELECT 1 row
     DONE DONE NonQuery  
 - RequestHandler
     User:
@@ -37,7 +37,7 @@ TODO:
         DONE DONE check trading deals
         DONE DONE create trading deals
         DONE DONE delete trading deals
-    Authorization
+    DONE DONE Authorization
     DONE DONE Card+Monster type
 - Optional:
     Win/Lose Ratio
