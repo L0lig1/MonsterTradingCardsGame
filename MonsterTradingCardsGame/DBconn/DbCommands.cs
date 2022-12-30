@@ -77,7 +77,7 @@ namespace MonsterTradingCardsGame.DBconn
                                                     "VALUES(@user, @card, 1)"
             },
             { 
-                "ShowStack", "SELECT cards.name, stack.amount " +
+                "ShowStack", "SELECT cards.name " +
                              "FROM users JOIN stack USING(username) JOIN cards ON cards.c_id = stack.card_id " +
                              "WHERE stack.username = @user "
             },

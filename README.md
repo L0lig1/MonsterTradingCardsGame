@@ -1,7 +1,7 @@
 MonsterTradingCardsGame
 
 TODO:
-- Threads
+- Battle Lobby
 - Unit Tests
 - Handling vereinheitlichen:
     DONE DONE SELECT multirow 
@@ -15,15 +15,15 @@ TODO:
         DONE DONE edit user data
         DONE DONE stats: 1 user
         DONE DONE scoreboard: all users
-        state management (tokens unso)
+        DONE DONE state management (tokens unso)
     Packages + Stack:
         DONE DONE create/add packages
         DONE DONE aquire packages
     Stack:
         DONE show stack (all acquired cards)
     Deck:
+        Check if Deck with same config alr there before assigning
         DONE DONE show deck
-        show deck different representation (was?)
         DONE DONE configure deck (delete when error in the middle)
     Battle
         DONE DONE ELO bekommen
@@ -45,12 +45,8 @@ TODO:
 
 
 - Errors:
-    Package already exists
-    Better error msg on 14)
-    Invalid request being printed twice?
+    DONE Package already exists
+    DONE Better error msg on 14)
+    DONE Invalid request being printed twice?
 
-    should fail and show original from before:
-    The provided cards have been added to altenhof's deck!
     dragon 50 fire monster vs waterspell 20 water spell => waterspell won
-
-     

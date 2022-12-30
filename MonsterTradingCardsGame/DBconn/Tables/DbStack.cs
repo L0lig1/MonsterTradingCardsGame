@@ -17,7 +17,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["ShowStack"], 2, new[] { 1 }, new string[,] { { "user", username } }, conn, true);
+                var resp = ExecQuery(Sql.Commands["ShowStack"], 1, null, new string[,] { { "user", username } }, conn, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
                     : throw new Exception("Stack could not be shown");

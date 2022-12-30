@@ -11,7 +11,7 @@ namespace MonsterTradingCardsGame.ClientServer
         private const int Port = 10001;
         private static readonly IPAddress LocalAddr = IPAddress.Loopback; // localhost
         private readonly TcpListener _serverSocket = new (LocalAddr, Port);
-        private Dictionary<string, DateTime> _authorization = new();
+        private readonly Dictionary<string, DateTime> _authorization = new();
 
         public void Start()
         {
@@ -40,11 +40,12 @@ namespace MonsterTradingCardsGame.ClientServer
             }
         }
 
-        private void HandleClient(object ct)
+        private void HandleClient(object? ct)
         {
             try
             {
                 // Convert the object to a TcpClient
+                if (ct == null) throw new Exception("Server error");
                 var client = (TcpClient)ct;
 
                 // Buffer for reading data

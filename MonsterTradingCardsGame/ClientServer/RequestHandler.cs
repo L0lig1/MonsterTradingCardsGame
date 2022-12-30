@@ -19,11 +19,20 @@ namespace MonsterTradingCardsGame.ClientServer
 
         private bool IsAuthorized(string username)
         {
-            if (_authorization[username] > DateTime.Now)
-                return _authorization.ContainsKey(username) && _authorization[username] > DateTime.Now;
+            try
+            {
+                if (_authorization[username] > DateTime.Now)
+                    return _authorization.ContainsKey(username) && _authorization[username] > DateTime.Now;
 
-            _authorization.Remove(username);
-            return false;
+                _authorization.Remove(username);
+                return false;
+            }
+            catch (Exception e)
+            {
+                if (e.Message.Contains("The given key")) // when username not in _authorization
+                    throw new Exception("User is not authorized! Log in or register!");
+                throw new Exception("Authorization failed");
+            }
         }
 
         public HttpResponse HandleRequest(Http.Request.HttpRequest? request, Dictionary<string, DateTime> authorization)
@@ -41,7 +50,7 @@ namespace MonsterTradingCardsGame.ClientServer
 
                 Console.WriteLine(splitUrl[1]);
 
-                if (splitUrl[1] != "sessions" && splitUrl[1] != "users")
+                if (splitUrl[1] != "sessions" && !(splitUrl[1] == "users" && request.Header.Method == "POST" && splitUrl.Length == 2))
                 {
                     if (request.Header.User != null && !IsAuthorized(request.Header.User))
                     {
@@ -69,7 +78,7 @@ namespace MonsterTradingCardsGame.ClientServer
             catch (Exception e)
             {
                 _router.Disconnect();
-                return _router.CreateHttpResponse(HttpStatusCode.Conflict, $"An error occured: {e.Message}");
+                return _router.CreateHttpResponse(HttpStatusCode.Conflict, $"Error: {e.Message}");
             }
         }
     }

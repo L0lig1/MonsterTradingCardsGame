@@ -90,24 +90,24 @@ namespace MonsterTradingCardsGame.DBconn
                 var splitUrl = request.Header.Url.Split('/');
                 var userToken = request.Header.AuthKey?.Split('-')[0];
                 if (splitUrl.Length > 2 && splitUrl[2] != userToken) throw new Exception("Unauthorized!");
-                if (splitUrl.Length == 2 && request.Body != null && request.Body.Data != null)
+                if (request.Header.Method == "POST" && splitUrl.Length == 2 && request.Body != null && request.Body.Data != null)
                 {
                     return _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
                 }
-                if (splitUrl.Length > 2 && request.Body != null && request.Body.Data != null)
+                if (request.Header.Method == "PUT" && splitUrl.Length > 2 && request.Body != null && request.Body.Data != null)
                 {
                     return _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString(), Conn );
                 }
-                if (splitUrl.Length > 2 && request.Body != null && request.Body.Data == null)
+                if (request.Header.Method == "GET" && splitUrl.Length > 2 && request.Body != null && request.Body.Data == null)
                 {
                     return _dbUser.GetUserById(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
                 }
-                throw new Exception("Error!");
+                throw new Exception("Invalid request!");
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                return CreateHttpResponse(HttpStatusCode.BadRequest, "Error");
+                return CreateHttpResponse(HttpStatusCode.BadRequest, "Error: " + e.Message);
             }
         }
 
@@ -268,12 +268,11 @@ namespace MonsterTradingCardsGame.DBconn
                 //Response = data.Split('?').Length == 1 ?
                 // Show Deck
                 //"akfjdsb" : "aflkds"; // Show Different representation
-                throw new Exception("adlfkn");
+                throw new Exception("Invalid request!");
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                throw new Exception(e.Message);
             }
         }
 

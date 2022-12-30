@@ -71,8 +71,6 @@ namespace MonsterTradingCardsGame.ClientServer.Http
         {
             return JsonConvert.DeserializeObject<dynamic>(line) ?? throw new InvalidOperationException();
         }
-
-        
         
     }
 }

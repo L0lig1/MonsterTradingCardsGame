@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,12 +18,14 @@ namespace MonsterTradingCardsGame.Battle
         private int _round = 1;
         private readonly User _user1;
         private readonly User _user2;
-        private Card _user1CurrentCard;
-        private Card _user2CurrentCard;
+        private Card? _user1CurrentCard;
+        private Card? _user2CurrentCard;
         private readonly LogFileManagement _log = new();
+
 
         public Battle(User user1, User user2)
         {
+            if (user1 == null || user2 == null) throw new Exception("Users invalid");
             _user1 = user1;
             _user2 = user2;
         }
@@ -95,10 +98,10 @@ namespace MonsterTradingCardsGame.Battle
         {
             if
             (
-                (attackingCard.CardType == "Monster" && defendingCard.CardType == "Monster") ||
+                (attackingCard.CardType == "monster" && defendingCard.CardType == "monster") ||
                 (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
                 (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
-                (defendingCard.Name == "Kraken"  && attackingCard.CardType == "Spell") ||
+                (defendingCard.Name == "Kraken"  && attackingCard.CardType == "spell") ||
                 (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
             )
             {
@@ -136,9 +139,9 @@ namespace MonsterTradingCardsGame.Battle
         {
             _log.Log(
                 $"Round {_round}{Environment.NewLine}" +
-                $"{_user1.Name}: {_user1CurrentCard.PrintCard()} vs " +
-                $"{_user2.Name}: {_user2CurrentCard.PrintCard()} => " + 
-                $"{_user1CurrentCard.Damage} VS {_user2CurrentCard.Damage}"
+                $"{_user1.Name}: {_user1CurrentCard?.PrintCard()} vs " +
+                $"{_user2.Name}: {_user2CurrentCard?.PrintCard()} => " + 
+                $"{_user1CurrentCard?.Damage} VS {_user2CurrentCard?.Damage}"
             );
         }
 
@@ -170,8 +173,8 @@ namespace MonsterTradingCardsGame.Battle
                 {
                     continue;
                 }
-                c1Damage = CalculateDamage(_user1CurrentCard, _user2CurrentCard);
-                c2Damage = CalculateDamage(_user2CurrentCard, _user1CurrentCard);
+                c1Damage = CalculateDamage(_user1CurrentCard ?? throw new InvalidOperationException(), _user2CurrentCard ?? throw new InvalidOperationException());
+                c2Damage = CalculateDamage(_user2CurrentCard ?? throw new InvalidOperationException(), _user1CurrentCard ?? throw new InvalidOperationException());
                 if (c1Damage > c2Damage) 
                 {
                     FightResult(_user1, _user1CurrentCard, c1Damage, _user2, _user2CurrentCard, c2Damage, false);

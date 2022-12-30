@@ -39,7 +39,8 @@ namespace MonsterTradingCardsGame.DBconn.Tables
         {
             foreach (var type in new CardTypes().ValidElementTypes)
             {
-                if (name.Contains("Regular")) return "Normal";
+                name = name.ToLower();
+                if (name.Contains("regular")) return "normal";
                 if (name.Contains(type)) return type;
             }
 
@@ -48,7 +49,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public string GetCardTypeFromName(string name)
         {
-            return name.Contains("Spell") ? "Spell" : "Monster";
+            return name.Contains("spell") ? "spell" : "monster";
         }
         
 

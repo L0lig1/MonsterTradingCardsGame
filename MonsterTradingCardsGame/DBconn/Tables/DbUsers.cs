@@ -84,13 +84,13 @@ namespace MonsterTradingCardsGame.DBconn.Tables
                 {
                     return response.Item1;
                 }
-                throw new Exception("Username could not be found");
+                throw new Exception($"Not enough coins! You have {response.Item2}, but should at least have 5");
 
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                throw new Exception("Error while retrieving coins: " + e.Message);
+                throw new Exception(e.Message);
             }
         }
 
