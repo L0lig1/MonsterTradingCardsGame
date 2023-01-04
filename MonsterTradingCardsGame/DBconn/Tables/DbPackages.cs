@@ -3,7 +3,7 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 using System.Net;
 
-namespace MonsterTradingCardsGame.DBconn.Tables
+namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbPackages : DbHandler
     {

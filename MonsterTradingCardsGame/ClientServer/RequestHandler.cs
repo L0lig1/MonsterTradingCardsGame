@@ -5,8 +5,8 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
-using MonsterTradingCardsGame.DBconn;
-using MonsterTradingCardsGame.DBconn.Tables;
+using MonsterTradingCardsGame.DbConn;
+using MonsterTradingCardsGame.DbConn.Tables;
 using Newtonsoft.Json;
 
 namespace MonsterTradingCardsGame.ClientServer
@@ -43,7 +43,7 @@ namespace MonsterTradingCardsGame.ClientServer
                 _router.Connect();
                 if (request == null)
                 {
-                    return _router.CreateHttpResponse(HttpStatusCode.BadRequest, "Request failed");
+                    return _router.CreateHttpResponse(HttpStatusCode.BadRequest, "Invalid request");
                 }
 
                 var splitUrl = request.Header.Url.Split('/');

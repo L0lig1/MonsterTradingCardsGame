@@ -8,7 +8,7 @@ using MonsterTradingCardsGame.CardNamespace;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
-namespace MonsterTradingCardsGame.DBconn.Tables
+namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbStack : DbHandler
     {

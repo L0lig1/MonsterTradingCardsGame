@@ -1,6 +1,6 @@
 ﻿using MonsterTradingCardsGame.ClientServer;
-using MonsterTradingCardsGame.DBconn;
-using MonsterTradingCardsGame.DBconn.Tables;
+using MonsterTradingCardsGame.DbConn;
+using MonsterTradingCardsGame.DbConn.Tables;
 
 
 namespace MonsterTradingCardsGame

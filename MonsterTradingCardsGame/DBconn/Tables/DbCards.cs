@@ -5,7 +5,7 @@ using Npgsql;
 
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 
-namespace MonsterTradingCardsGame.DBconn.Tables
+namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbCards : DbHandler
     {
@@ -40,7 +40,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
             foreach (var type in new CardTypes().ValidElementTypes)
             {
                 name = name.ToLower();
-                if (name.Contains("regular")) return "normal";
+                if (name.Contains("Regular")) return "Normal";
                 if (name.Contains(type)) return type;
             }
 
@@ -49,7 +49,7 @@ namespace MonsterTradingCardsGame.DBconn.Tables
 
         public string GetCardTypeFromName(string name)
         {
-            return name.Contains("spell") ? "spell" : "monster";
+            return name.Contains("Spell") ? "spell" : "monster";
         }
         
 

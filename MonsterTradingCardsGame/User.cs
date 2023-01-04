@@ -31,9 +31,6 @@ namespace user
             var rand = new Random();
             return Deck[rand.Next(0, Deck.Count)];
         }
-        
-
-        
     }
 }
 

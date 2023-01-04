@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
-namespace MonsterTradingCardsGame.DBconn.Tables
+namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbTradings : DbHandler
     {

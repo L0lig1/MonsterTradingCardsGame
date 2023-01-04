@@ -13,9 +13,9 @@ namespace MonsterTradingCardsGame.CardNamespace
     {
         //Random _rnd = new();
         private int _damage;
-        private string _id;
-        private string _elementType;
-        private string _cardType;
+        private string _id = string.Empty, 
+                       _elementType = string.Empty,
+                       _cardType = string.Empty;
 
         public Card(string id, string name, int damage, string elementType, string cardType)
         {

@@ -1,13 +1,13 @@
 ﻿using MonsterTradingCardsGame.ClientServer.Http.Request;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
-using MonsterTradingCardsGame.DBconn.Tables;
 using Npgsql;
 using System.Net;
 using System.Threading;
 using MonsterTradingCardsGame.CardNamespace;
+using MonsterTradingCardsGame.DbConn.Tables;
 using user;
 
-namespace MonsterTradingCardsGame.DBconn
+namespace MonsterTradingCardsGame.DbConn
 {
 
     public class Router
@@ -276,21 +276,78 @@ namespace MonsterTradingCardsGame.DBconn
             }
         }
 
+        private readonly GameLobby _game = new ();
+
         public HttpResponse BattleRoute(HttpRequest request)
         {
             try
             {
-                // thread should wait for other thread to come
-                // when other thread comes, exe battle
-                var celo1 = int.Parse(_dbUser.UserStats("kienboec", Conn).Body?.Data);
-                var celo2 = int.Parse(_dbUser.UserStats("altenhof", Conn).Body?.Data);
-                
-                var battle = new Battle.Battle(new User("kienboec", _dbStack.GetDeck("kienboec", Conn), celo1),
-                                               new User("altenhof", _dbStack.GetDeck("altenhof", Conn), celo2));
-                var battleLog = battle.Fight();
-                Console.WriteLine(battleLog.Item1 + Environment.NewLine + battleLog.Item2 + Environment.NewLine + battleLog.Item3);
-                _dbUser.UpdateUserStats("kienboec", battleLog.Item2, Conn);
-                _dbUser.UpdateUserStats("altenhof", battleLog.Item3, Conn);
+                if (Conn == null || request.Header?.User == null) throw new Exception("Invalid request");
+
+                var response = _game.PlayGame(Conn, request.Header.User);
+
+                return CreateHttpResponse(HttpStatusCode.OK, response.Item1);
+            }
+            catch (Exception e)
+            {
+                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message);
+            }
+        }
+    }
+
+    class GameLobby
+    {
+        // A flag to track when both players have joined
+        public bool BothPlayersJoined = false;
+
+        // A lock to synchronize access to the flag
+        private readonly object  _lockFlag   = new();
+        private readonly DbUsers _dbUser     = new();
+        private readonly DbStack _dbStack    = new();
+        private readonly List<string> _users = new();
+        private dynamic? _celo1 = 0, _celo2 = 0;
+        //private readonly NpgsqlConnection _conn = new();
+
+
+        public (string, int, int) PlayGame(NpgsqlConnection conn, string username)
+        {
+            try
+            {
+                (string, int, int) battleLog = default;
+                // Wait for the other player to join
+                lock (_lockFlag)
+                {
+                    _users.Add(username);
+                    if (!BothPlayersJoined)
+                    {
+                        _celo1 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
+                        BothPlayersJoined = true;
+                        Monitor.Wait(_lockFlag);
+                    }
+                    else
+                    {
+                        _celo2 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
+
+                        // change decks
+                        // Both players have joined, start the game!
+                        Console.WriteLine("Game starting!");
+                        // Code for the game goes here
+
+                        var battle = new Battle.Battle(new User(_users[0], _dbStack.GetDeck(_users[0], conn), _celo1),
+                            new User(_users[1], _dbStack.GetDeck(_users[1], conn), _celo2));
+                        battleLog = battle.Fight();
+                        Console.WriteLine(battleLog.Item1 + Environment.NewLine + battleLog.Item2 + Environment.NewLine + battleLog.Item3);
+                        _dbUser.UpdateUserStats(_users[0], battleLog.Item2, conn);
+                        _dbUser.UpdateUserStats(_users[1], battleLog.Item3, conn);
+                         
+                        
+                        Monitor.Pulse(_lockFlag);
+                    }
+                }
+                var tId = Thread.CurrentThread.ManagedThreadId;
+                return battleLog;
+                //if (battleLog.Item1 != null) return battleLog.Item1;
+                throw new Exception("Could not do battle");
                 /*
                  * Battle:
                  * 2 User class
@@ -299,12 +356,14 @@ namespace MonsterTradingCardsGame.DBconn
                  *
                  */
                 // when battle over, give result to each thread
-                return CreateHttpResponse(HttpStatusCode.OK, battleLog.Item1);
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message);
+                Console.WriteLine(e);
+                throw new Exception(e.Message);
             }
         }
+
+        
     }
 }

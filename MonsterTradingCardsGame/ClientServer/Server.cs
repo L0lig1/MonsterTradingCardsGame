@@ -18,6 +18,7 @@ namespace MonsterTradingCardsGame.ClientServer
             try
             {
                 _serverSocket.Start();
+                var rh = new RequestHandler();
                 while (true)
                 {
                     // Wait for a client to connect
@@ -25,8 +26,8 @@ namespace MonsterTradingCardsGame.ClientServer
                     var clientSocket = _serverSocket.AcceptTcpClient();
 
                     // Start a new thread to handle the client connection
-                    var clientThread = new Thread(HandleClient);
-                    clientThread.Start(clientSocket);
+                    var clientThread = new Thread(() => HandleClient(clientSocket, rh));
+                    clientThread.Start();
                 }
             }
             catch (Exception e)
@@ -40,7 +41,7 @@ namespace MonsterTradingCardsGame.ClientServer
             }
         }
 
-        private void HandleClient(object? ct)
+        private void HandleClient(object? ct, RequestHandler rh)
         {
             try
             {
@@ -71,7 +72,7 @@ namespace MonsterTradingCardsGame.ClientServer
                     }
                 }
                 // Process the data sent by the client.
-                var rh = new RequestHandler();
+                
                 var response = rh.HandleRequest(ParseHttpData(recvData), _authorization);
                 
                 

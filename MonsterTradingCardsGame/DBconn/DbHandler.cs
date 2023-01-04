@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
-namespace MonsterTradingCardsGame.DBconn
+namespace MonsterTradingCardsGame.DbConn
 {
     public class DbHandler
     {
@@ -26,7 +26,8 @@ namespace MonsterTradingCardsGame.DBconn
         {
             for (var i = 0; i < values.GetLength(0); i++)
             {
-                command.Parameters.AddWithValue($"@{values[i,0]}", 
+                command.Parameters.AddWithValue(
+                    $"@{values[i,0]}", 
                     values[i, 0] == "dmg" || values[i, 0] == "ctp" || values[i, 0] == "pts"
                         ? int.Parse(values[i,1]) 
                         : values[i, 1]);
