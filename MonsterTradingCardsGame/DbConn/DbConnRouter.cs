@@ -58,7 +58,6 @@ namespace MonsterTradingCardsGame.DbConn
                                             $"Port={Port};" +
                                             $"Password={Password};" +
                                             $"SSLMode={SSLMode}");
-                Console.Out.WriteLine("Opening connection");
                 Conn.Open();
                 Console.WriteLine("Connected!");
             }
@@ -128,7 +127,7 @@ namespace MonsterTradingCardsGame.DbConn
                 if (request.Body?.Data != null)
                 {
                     return request.Header.AuthKey?.Split('-')[0] == "admin" 
-                        ? _dbPackages.CreatePackage(request.Body?.Data, Conn) 
+                        ? _dbPackages.CreatePackage(request.Body?.Data, Conn)
                         : CreateHttpResponse(HttpStatusCode.Unauthorized, "Only admins can create packages");
                 }
                 return CreateHttpResponse(HttpStatusCode.Conflict, "Could not create Package!");
@@ -164,8 +163,7 @@ namespace MonsterTradingCardsGame.DbConn
 
                     _dbPackages.DeletePackage(packages[0].Split('@')[0], Conn);
                     _dbUser.UseCoins(username, 5, Conn);
-                    return CreateHttpResponse(HttpStatusCode.OK,
-                        $"Cards added to {username}'s stack!");
+                    return CreateHttpResponse(HttpStatusCode.OK, $"Cards added to {username}'s stack!");
                 }
 
             }
@@ -313,6 +311,7 @@ namespace MonsterTradingCardsGame.DbConn
         {
             try
             {
+                /* dictionary (thread safe) username battlelog, für jeweilige user reinschreiben */
                 (string, int, int) battleLog = default;
                 // Wait for the other player to join
                 lock (_lockFlag)
@@ -323,6 +322,7 @@ namespace MonsterTradingCardsGame.DbConn
                         _celo1 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
                         BothPlayersJoined = true;
                         Monitor.Wait(_lockFlag);
+                        // check in dict if user has battlelog, wait until username has battlelog
                     }
                     else
                     {
@@ -344,10 +344,8 @@ namespace MonsterTradingCardsGame.DbConn
                         Monitor.Pulse(_lockFlag);
                     }
                 }
-                var tId = Thread.CurrentThread.ManagedThreadId;
+                
                 return battleLog;
-                //if (battleLog.Item1 != null) return battleLog.Item1;
-                throw new Exception("Could not do battle");
                 /*
                  * Battle:
                  * 2 User class

@@ -98,7 +98,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                 
                 if (tradee1.Item1 == false || tradee2.Item1 == false)
                 {
-                    throw new Exception( "Trade offer or provided card does not exist!");
+                    throw new Exception("Trade offer or provided card does not exist!");
                 }
 
                 var trade1Split = tradee1.Item2.Split('@'); // user, ct, dmg, amount, c_id

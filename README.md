@@ -1,7 +1,6 @@
 MonsterTradingCardsGame
 
 TODO:
-- Battle Lobby
 - Unit Tests
 - Mandatory feature
 - Lock Card for trade
@@ -32,8 +31,10 @@ TODO:
         DONE DONE User info bekommen
         DONE DONE Battle starten und response zurückgeben
         DONE DONE ELO nachm battle
+        ---- schau manchmal funktionierts nd
+        ---- schau rückgabe 2 thread
         ---- schau errors
-        ---- Deck nach dem Spiel an das Gewinner geben 
+        ---- Deck nach dem Spiel an das Gewinner geben
     Trade:
         DONE DONE Trade (stack funktionen myb in DbStack?)
         DONE DONE check trading deals
