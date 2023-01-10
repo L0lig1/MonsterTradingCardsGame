@@ -17,25 +17,45 @@ namespace MonsterTradingCardsGame.Battle
         private readonly DbUsers _dbUser = new();
         private readonly DbStack _dbStack = new();
         private readonly List<string> _users = new();
+        private NpgsqlConnection _conn = null!;
         private dynamic? _celo1 = 0, _celo2 = 0;
+        private (string, int, int) _battleLog;
 
-        private ConcurrentDictionary<string, string> _gameResults = new();
+        private readonly ConcurrentDictionary<string, string> _gameResults = new();
         //private readonly NpgsqlConnection _conn = new();
 
-
-        public string PlayGame(NpgsqlConnection conn, string username)
+        private void PlayGame()
         {
+            Console.WriteLine("Game starting!");
+            var battle = new Battle(
+                new User(_users[0], _dbStack.GetDeck(_users[0], _conn), _celo1),
+                new User(_users[1], _dbStack.GetDeck(_users[1], _conn), _celo2)
+            );
+            _battleLog = battle.Fight();
+            Console.WriteLine(_battleLog.Item1 + Environment.NewLine + _battleLog.Item2 + Environment.NewLine + _battleLog.Item3);
+        }
+
+        private void UpdateUserStatsAndAddBattleResult(string username, int elo)
+        {
+            _dbUser.UpdateUserStats(username, elo, _conn);
+            _gameResults.TryAdd(username, _battleLog.Item1);
+        }
+
+
+        public string StartLobby(NpgsqlConnection conn, string username)
+        {
+            _conn = conn;
             try
             {
                 /* dictionary (thread safe) username battlelog, für jeweilige user reinschreiben */
-                (string, int, int) battleLog = default;
                 // Wait for the other player to join
+                //(string, int, int) battleLog = default;
                 lock (_lockFlag)
                 {
                     _users.Add(username);
                     if (!OnePlayerJoined)
                     {
-                        _celo1 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
+                        _celo1 = int.Parse(_dbUser.UserStats(username, _conn).Body?.Data);
                         OnePlayerJoined = true;
                         Monitor.Wait(_lockFlag);
                         if (_gameResults.ContainsKey(_users[0]))
@@ -44,21 +64,13 @@ namespace MonsterTradingCardsGame.Battle
                     }
                     else
                     {
-                        _celo2 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
-
-                        // change decks
                         // Both players have joined, start the game!
-                        Console.WriteLine("Game starting!");
-                        // Code for the game goes here
 
-                        var battle = new Battle(new User(_users[0], _dbStack.GetDeck(_users[0], conn), _celo1),
-                            new User(_users[1], _dbStack.GetDeck(_users[1], conn), _celo2));
-                        battleLog = battle.Fight();
-                        Console.WriteLine(battleLog.Item1 + Environment.NewLine + battleLog.Item2 + Environment.NewLine + battleLog.Item3);
-                        _dbUser.UpdateUserStats(_users[0], battleLog.Item2, conn);
-                        _dbUser.UpdateUserStats(_users[1], battleLog.Item3, conn);
-                        _gameResults.TryAdd(_users[0], battleLog.Item1);
-                        _gameResults.TryAdd(_users[1], battleLog.Item1);
+                        _celo2 = int.Parse(_dbUser.UserStats(username, _conn).Body?.Data);
+
+                        PlayGame();
+                        UpdateUserStatsAndAddBattleResult(_users[0], _battleLog.Item2);
+                        UpdateUserStatsAndAddBattleResult(_users[1], _battleLog.Item3);
 
 
 
@@ -66,8 +78,7 @@ namespace MonsterTradingCardsGame.Battle
                     }
                 }
 
-                if (battleLog.Item1 != null) return battleLog.Item1;
-                throw new Exception("Error while battling");
+                return _battleLog.Item1;
                 /*
                  * Battle:
                  * 2 User class

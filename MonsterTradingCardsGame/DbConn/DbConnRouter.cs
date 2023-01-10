@@ -277,7 +277,7 @@ namespace MonsterTradingCardsGame.DbConn
             {
                 if (Conn == null || request.Header?.User == null) throw new Exception("Invalid request");
 
-                var response = _game.PlayGame(Conn, request.Header.User);
+                var response = _game.StartLobby(Conn, request.Header.User);
 
                 return CreateHttpResponse(HttpStatusCode.OK, response);
             }

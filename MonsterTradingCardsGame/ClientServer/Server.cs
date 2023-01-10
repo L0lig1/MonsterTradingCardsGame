@@ -74,12 +74,14 @@ namespace MonsterTradingCardsGame.ClientServer
                 // Process the data sent by the client.
                 
                 var response = rh.HandleRequest(ParseHttpData(recvData), _authorization);
-                
-                
-                var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());
-                
-                // Send back a response.
-                stream.Write(msg, 0, msg.Length);
+                object lockFlag = new();
+                lock (lockFlag)
+                {
+                    var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());
+                    
+                    // Send back a response.
+                    stream.Write(msg, 0, msg.Length);
+                }
             }
             catch (SocketException e)
             {
