@@ -2,6 +2,7 @@
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
+
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
     internal class DbUsers : DbHandler

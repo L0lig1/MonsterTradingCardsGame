@@ -2,6 +2,7 @@
 using Npgsql;
 using System.Net;
 
+
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbPackages : DbHandler
