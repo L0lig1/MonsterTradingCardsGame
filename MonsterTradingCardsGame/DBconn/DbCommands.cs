@@ -6,6 +6,20 @@ using System.Threading.Tasks;
 
 namespace MonsterTradingCardsGame.DbConn
 {
+    internal class Query
+    {
+        public Query(string sqlCommand, string colNr, string[,]? sqlCommandParams)
+        {
+            SqlCommand = sqlCommand;
+            ColNr = colNr;
+            SqlCommandParams = sqlCommandParams;
+        }
+
+        public string SqlCommand { get; set; }
+        public string ColNr { get; set; }
+        public string[,]? SqlCommandParams{ get; set; }
+    }
+
     public class DbCommands
     {
         public Dictionary<string, string> Commands = new()

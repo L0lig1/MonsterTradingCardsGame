@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 
@@ -20,7 +15,6 @@ namespace MonsterTradingCardsGame.DbConn
                 Body = new HttpResponseBody(body)
             };
         }
-        
 
         public void AddParamWithValue(NpgsqlCommand command, string[,] values)
         {
@@ -41,6 +35,7 @@ namespace MonsterTradingCardsGame.DbConn
             try
             {
                 var worked = command.ExecuteNonQuery();
+                // CHECK THIS
                 //if (worked <= 0)
                 //{
                 //    throw new Exception("Error: Query not successful");
@@ -105,7 +100,7 @@ namespace MonsterTradingCardsGame.DbConn
             return resp;
         }
 
-        public (bool, string) ExecQuery(string cmd, int columnSize, int[]? intIndexes, string[,]? values, NpgsqlConnection conn, bool recvResp)
+        public (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, NpgsqlConnection conn, bool recvResp)
         {
             using var command = new NpgsqlCommand(cmd, conn);
             if (values != null) AddParamWithValue(command, values);
@@ -118,7 +113,7 @@ namespace MonsterTradingCardsGame.DbConn
                     return (true, recvResp 
                         ? (cmd.Contains("SELECT * FROM users") 
                             ? GetUserByIdResponse(reader) 
-                            : GetQueryResponse(columnSize, intIndexes, reader)) 
+                            : GetQueryResponse(returnColumnSize, intIndexes, reader)) 
                         : "");
                 }
 
@@ -132,8 +127,6 @@ namespace MonsterTradingCardsGame.DbConn
                 return (false, "Query Failed! " + e.Message); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
             }
         }
-
-
 
     }
 }

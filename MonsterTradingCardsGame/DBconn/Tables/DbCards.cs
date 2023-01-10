@@ -1,9 +1,5 @@
-﻿
-using MonsterTradingCardsGame.CardNamespace;
+﻿using MonsterTradingCardsGame.CardNamespace;
 using Npgsql;
-
-
-using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
@@ -52,6 +48,5 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             return name.Contains("Spell") ? "spell" : "monster";
         }
         
-
     }
 }

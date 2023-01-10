@@ -1,4 +1,5 @@
-﻿using MonsterTradingCardsGame.ClientServer.Http.Request;
+﻿using System.Collections.Concurrent;
+using MonsterTradingCardsGame.ClientServer.Http.Request;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 using System.Net;
@@ -11,13 +12,11 @@ namespace MonsterTradingCardsGame.DbConn
 {
 
     public class Router
-
     {
         private readonly DbPackages _dbPackages = new();
         private readonly DbUsers _dbUser = new();
         private readonly DbTradings _dbTradings = new();
         private readonly DbStack _dbStack = new();
-
 
         private const string Server = "127.0.0.1";
         private const string Username = "postgres";
@@ -30,22 +29,22 @@ namespace MonsterTradingCardsGame.DbConn
 
         public void TruncateAll()
         {
-            var db = new DbHandler();
-            Connect();
-            if (
-                db.ExecNonQuery("TRUNCATE TABLE cards", null, Conn) &&
-                db.ExecNonQuery("TRUNCATE TABLE packages", null, Conn) &&
-                db.ExecNonQuery("TRUNCATE TABLE stack", null, Conn) &&
-                db.ExecNonQuery("TRUNCATE TABLE trading", null, Conn) &&
-                db.ExecNonQuery("TRUNCATE TABLE users", null, Conn))
+            try
             {
-                Console.WriteLine("ALL TABLES TRUNCATED");
+                var db = new DbHandler();
+                Connect();
+                string[] tables = { "cards", "packages", "stack", "trading", "users" };
+                if (tables.Any(table => Conn == null || !db.ExecNonQuery($"TRUNCATE TABLE {table}", null, Conn)))
+                {
+                    throw new Exception("PROBLEM TRUNCATING TABLES");
+                }
+                Disconnect();
             }
-            else
+            catch (Exception e)
             {
-                Console.WriteLine("PROBLEM TRUNCATING TABLES");
+                Console.WriteLine(e);
+                throw;
             }
-            Disconnect();
         }
 
         public void Connect()
@@ -89,19 +88,16 @@ namespace MonsterTradingCardsGame.DbConn
                 var splitUrl = request.Header.Url.Split('/');
                 var userToken = request.Header.AuthKey?.Split('-')[0];
                 if (splitUrl.Length > 2 && splitUrl[2] != userToken) throw new Exception("Unauthorized!");
-                if (request.Header.Method == "POST" && splitUrl.Length == 2 && request.Body != null && request.Body.Data != null)
+                return request.Header.Method switch
                 {
-                    return _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
-                }
-                if (request.Header.Method == "PUT" && splitUrl.Length > 2 && request.Body != null && request.Body.Data != null)
-                {
-                    return _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString(), Conn );
-                }
-                if (request.Header.Method == "GET" && splitUrl.Length > 2 && request.Body != null && request.Body.Data == null)
-                {
-                    return _dbUser.GetUserById(splitUrl[2], request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn);
-                }
-                throw new Exception("Invalid request!");
+                    "POST" when splitUrl.Length == 2 && request.Body != null && request.Body.Data != null =>
+                        _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn),
+                    "PUT" when splitUrl.Length > 2 && request.Body != null && request.Body.Data != null =>
+                        _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString(), Conn),
+                    "GET" when splitUrl.Length > 2 && request.Body != null && request.Body.Data == null =>
+                        _dbUser.GetUserById(splitUrl[2],request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), Conn),
+                    _ => throw new Exception("Invalid request!")
+                };
             }
             catch (Exception e)
             {
@@ -149,7 +145,7 @@ namespace MonsterTradingCardsGame.DbConn
                     // Aqcuire packages
                     _dbUser.HasEnoughCoins(username, Conn);
 
-                    var packages = _dbPackages.GetPackage(Conn);
+                    var packages = _dbPackages.GetPackageByRandId(Conn);
                     foreach (var package in packages)
                     {
                         var response = _dbStack.AddCardToStack(username ?? throw new InvalidOperationException(),
@@ -284,7 +280,7 @@ namespace MonsterTradingCardsGame.DbConn
 
                 var response = _game.PlayGame(Conn, request.Header.User);
 
-                return CreateHttpResponse(HttpStatusCode.OK, response.Item1);
+                return CreateHttpResponse(HttpStatusCode.OK, response);
             }
             catch (Exception e)
             {
@@ -296,7 +292,7 @@ namespace MonsterTradingCardsGame.DbConn
     class GameLobby
     {
         // A flag to track when both players have joined
-        public bool BothPlayersJoined = false;
+        public bool OnePlayerJoined = false;
 
         // A lock to synchronize access to the flag
         private readonly object  _lockFlag   = new();
@@ -304,10 +300,12 @@ namespace MonsterTradingCardsGame.DbConn
         private readonly DbStack _dbStack    = new();
         private readonly List<string> _users = new();
         private dynamic? _celo1 = 0, _celo2 = 0;
+
+        private ConcurrentDictionary<string, string> _gameResults = new();
         //private readonly NpgsqlConnection _conn = new();
 
 
-        public (string, int, int) PlayGame(NpgsqlConnection conn, string username)
+        public string PlayGame(NpgsqlConnection conn, string username)
         {
             try
             {
@@ -317,11 +315,13 @@ namespace MonsterTradingCardsGame.DbConn
                 lock (_lockFlag)
                 {
                     _users.Add(username);
-                    if (!BothPlayersJoined)
+                    if (!OnePlayerJoined)
                     {
                         _celo1 = int.Parse(_dbUser.UserStats(username, conn).Body?.Data);
-                        BothPlayersJoined = true;
+                        OnePlayerJoined = true;
                         Monitor.Wait(_lockFlag);
+                        if (_gameResults.ContainsKey(_users[0]))
+                            return _gameResults[_users[0]];
                         // check in dict if user has battlelog, wait until username has battlelog
                     }
                     else
@@ -339,13 +339,17 @@ namespace MonsterTradingCardsGame.DbConn
                         Console.WriteLine(battleLog.Item1 + Environment.NewLine + battleLog.Item2 + Environment.NewLine + battleLog.Item3);
                         _dbUser.UpdateUserStats(_users[0], battleLog.Item2, conn);
                         _dbUser.UpdateUserStats(_users[1], battleLog.Item3, conn);
+                        _gameResults.TryAdd(_users[0], battleLog.Item1);
+                        _gameResults.TryAdd(_users[1], battleLog.Item1);
+
                          
                         
                         Monitor.Pulse(_lockFlag);
                     }
                 }
-                
-                return battleLog;
+
+                if (battleLog.Item1 != null) return battleLog.Item1;
+                throw new Exception("Error while battling");
                 /*
                  * Battle:
                  * 2 User class

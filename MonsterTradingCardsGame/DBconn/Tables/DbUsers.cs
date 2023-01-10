@@ -6,14 +6,6 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 {
     internal class DbUsers : DbHandler
     {
-        public new static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
-        {
-            return new HttpResponse
-            {
-                Header = new ClientServer.Http.Response.HttpResponseHeader(status, "text/plain", body.Length),
-                Body = new HttpResponseBody(body)
-            };
-        }
 
         public HttpResponse RegisterUser(string username, string password, NpgsqlConnection conn)
         {
@@ -105,7 +97,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "asfafsafasfafs" + e.Message);
+                return CreateHttpResponse(HttpStatusCode.Conflict, e.Message);
             }
         }
 
@@ -130,7 +122,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                 var resp = ExecQuery(Sql.Commands["Scoreboard"], 2, new[] { 1 }, null, conn, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, resp.Item2)
-                    : throw new Exception("Query failed");
+                    : throw new Exception("Could not retrieve scoreboard");
 
             }
             catch (Exception e)
@@ -143,7 +135,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
         {
             try
             {
-                var response = ExecQuery(Sql.Commands["GetUserById"], 7, null, new[,] { { "user", userUrl } }, conn, true);
+                var response = ExecQuery(Sql.Commands["GetUserById"], 7, new []{2,3}, new[,] { { "user", userUrl } }, conn, true);
                 return response.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, $"{userUrl}'s Profile: {Environment.NewLine}{response.Item2}")
                     : CreateHttpResponse(HttpStatusCode.Conflict, "User not found!");
@@ -153,5 +145,6 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                 return CreateHttpResponse(HttpStatusCode.Unauthorized, "Error: " + e.Message);
             }
         }
+
     }
 }
