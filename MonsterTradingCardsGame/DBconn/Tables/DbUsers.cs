@@ -5,7 +5,7 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
-    internal class DbUsers : DbHandler
+    public class DbUsers : DbHandler
     {
 
         public HttpResponse RegisterUser(string username, string password, NpgsqlConnection conn)

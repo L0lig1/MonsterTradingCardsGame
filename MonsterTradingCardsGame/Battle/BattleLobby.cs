@@ -35,7 +35,7 @@ namespace MonsterTradingCardsGame.Battle
             Console.WriteLine(_battleLog.Item1 + Environment.NewLine + _battleLog.Item2 + Environment.NewLine + _battleLog.Item3);
         }
 
-        private void UpdateUserStatsAndAddBattleResult(string username, int elo)
+        private void BattleResult(string username, int elo)
         {
             _dbUser.UpdateUserStats(username, elo, _conn);
             _gameResults.TryAdd(username, _battleLog.Item1);
@@ -69,8 +69,8 @@ namespace MonsterTradingCardsGame.Battle
                         _celo2 = int.Parse(_dbUser.UserStats(username, _conn).Body?.Data);
 
                         PlayGame();
-                        UpdateUserStatsAndAddBattleResult(_users[0], _battleLog.Item2);
-                        UpdateUserStatsAndAddBattleResult(_users[1], _battleLog.Item3);
+                        BattleResult(_users[0], _battleLog.Item2);
+                        BattleResult(_users[1], _battleLog.Item3);
 
 
 
