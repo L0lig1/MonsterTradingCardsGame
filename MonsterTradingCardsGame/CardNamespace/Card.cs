@@ -1,22 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterTradingCardsGame;
-using MonsterTradingCardsGame.CardNamespace;
-
+﻿
 
 namespace MonsterTradingCardsGame.CardNamespace
 {
     public class Card
     {
-        //Random _rnd = new();
-        private int _damage;
-        private string _id = string.Empty, 
-                       _elementType = string.Empty,
-                       _cardType = string.Empty;
-
         public Card(string id, string name, int damage, string elementType, string cardType)
         {
             Id = id;
@@ -26,10 +13,13 @@ namespace MonsterTradingCardsGame.CardNamespace
             CardType = cardType;
         }
 
-        public string Name { get => _id; set => _id = value; }
+        public string Name { get; set; }
         public string Id { get; set; }
+        private int _damage;
+        private string _elementType = string.Empty,
+                       _cardType    = string.Empty;
         public string[] ValidElementTypes = new CardTypes().ValidElementTypes;
-        public string[] ValidCardTypes = new CardTypes().ValidCardTypes;
+        public string[] ValidCardTypes    = new CardTypes().ValidCardTypes;
 
         public string CardType   
         {

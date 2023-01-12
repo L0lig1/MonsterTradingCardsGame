@@ -6,7 +6,6 @@ using MonsterTradingCardsGame.DbConn;
 
 namespace MonsterTradingCardsGame.ClientServer
 {
-
     internal class RequestHandler
     {
         private readonly Router _router = new ();

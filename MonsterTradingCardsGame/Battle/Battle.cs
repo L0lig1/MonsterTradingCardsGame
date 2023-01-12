@@ -5,14 +5,14 @@ using user;
 
 namespace MonsterTradingCardsGame.Battle
 {
-    
     class Battle
     {
         private int _round = 1;
         private readonly User _user1;
         private readonly User _user2;
-        private Card? _user1CurrentCard;
-        private Card? _user2CurrentCard;
+        private readonly Calculator _calc = new();
+        private Card _user1CurrentCard = null!;
+        private Card _user2CurrentCard = null!;
         private readonly LogFileManagement _log = new();
 
 
@@ -22,88 +22,7 @@ namespace MonsterTradingCardsGame.Battle
             _user1 = user1;
             _user2 = user2;
         }
-
-        public static int CalculateDmgElementType(Card attackingCard, Card defendingCard)
-        {
-            switch (attackingCard.ElementType)
-            {
-                case "Fire"   when defendingCard.ElementType == "Water":
-                case "Normal" when defendingCard.ElementType == "Fire":
-                case "Water"  when defendingCard.ElementType == "Normal":
-                    return attackingCard.Damage / 2;
-                case "Water"  when defendingCard.ElementType == "Fire":
-                case "Fire"   when defendingCard.ElementType == "Normal":
-                case "Normal" when defendingCard.ElementType == "Water":
-                    return attackingCard.Damage * 2;
-                default:
-                    return attackingCard.Damage;
-            }
-        }
-
-        public static int CalculateEloRating(int playerARating, int playerBRating, double score)
-        {
-            // Calculate the expected score for player A
-            double expectedScore = CalculateExpectedScore(playerARating, playerBRating);
-
-            // Determine the K factor to use based on the rating of player A
-            int kFactor = DetermineKFactor(playerARating);
-
-            // Calculate the rating change for player A
-            int ratingChange = (int)Math.Round(kFactor * (score - expectedScore));
-
-            // Return the updated rating for player A
-            return playerARating + ratingChange;
-        }
-
-        private static double CalculateExpectedScore(int playerARating, int playerBRating)
-        {
-            double denominator = 1 + Math.Pow(10, (playerBRating - playerARating) / 400.0);
-            return 1 / denominator;
-        }
-
-        private static int DetermineKFactor(int playerRating)
-        {
-            return playerRating switch
-            {
-                < 100 => 32,
-                < 200 => 24,
-                _ => 16
-            };
-        }
-
-        public bool KnightVsWater()
-        {
-            //if (_user1CurrentCard.Name == "Knight" && _user2CurrentCard.ElementType == "water")
-            //{
-            //    FightResult(_user2, _user2CurrentCard, 0, _user1, _user1CurrentCard, 0, true);
-            //    return true;
-            //}
-            //if (_user2CurrentCard.Name == "Knight" && _user1CurrentCard.ElementType == "water")
-            //{
-            //    FightResult(_user1, _user1CurrentCard, 0, _user2, _user2CurrentCard, 0, true);
-            //    return true;
-            //}
-
-            return false;
-        }
-
-        public static int CalculateDamage(Card attackingCard, Card defendingCard)
-        {
-            if
-            (
-                (attackingCard.CardType == "monster" && defendingCard.CardType == "monster") ||
-                (attackingCard.Name == "Goblin"  && defendingCard.Name == "Dragon") || 
-                (attackingCard.Name == "Ork"     && defendingCard.Name == "Wizzard") ||
-                (defendingCard.Name == "Kraken"  && attackingCard.CardType == "spell") ||
-                (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
-            )
-            {
-                return attackingCard.Damage;
-            }
-
-            return CalculateDmgElementType(attackingCard, defendingCard);
-        }
-
+        
         public void GameEnd()
         {
             if (_user1.Deck.Count == 0 || _user2.Deck.Count == 0)
@@ -151,6 +70,22 @@ namespace MonsterTradingCardsGame.Battle
             _user2CurrentCard = _user2.ReturnRandomCardFromDeck();
         }
 
+        public void CompareDamage(int card1dmg, int card2dmg)
+        {
+            if (card1dmg > card2dmg)
+            {
+                FightResult(_user1, _user1CurrentCard, card1dmg, _user2, _user2CurrentCard, card2dmg, false);
+            }
+            else if (card1dmg < card2dmg)
+            {
+                FightResult(_user2, _user2CurrentCard, card2dmg, _user1, _user1CurrentCard, card1dmg, false);
+            }
+            else
+            {
+                _log.Log($" => Draw!{Environment.NewLine}");
+            }
+        }
+
         public (string, int, int) Fight()
         {
             Console.WriteLine($"{Environment.NewLine}THE FIGHT BEGINS!");
@@ -161,26 +96,9 @@ namespace MonsterTradingCardsGame.Battle
             {
                 SetRandomCards();
                 PrintCurrentCards();
-
-                if (KnightVsWater())
-                {
-                    continue;
-                }
-                c1Damage = CalculateDamage(_user1CurrentCard ?? throw new InvalidOperationException(), _user2CurrentCard ?? throw new InvalidOperationException());
-                c2Damage = CalculateDamage(_user2CurrentCard ?? throw new InvalidOperationException(), _user1CurrentCard ?? throw new InvalidOperationException());
-                if (c1Damage > c2Damage)
-                {
-                    FightResult(_user1, _user1CurrentCard, c1Damage, _user2, _user2CurrentCard, c2Damage, false);
-                }
-                else if (c1Damage < c2Damage)
-                {
-                    FightResult(_user2, _user2CurrentCard, c2Damage, _user1, _user1CurrentCard, c1Damage, false);
-                }
-                else
-                {
-                    _log.Log($" => Draw!{Environment.NewLine}");
-                }
-
+                c1Damage = _calc.CalculateDamage(_user1CurrentCard ?? throw new InvalidOperationException(), _user2CurrentCard ?? throw new InvalidOperationException());
+                c2Damage = _calc.CalculateDamage(_user2CurrentCard ?? throw new InvalidOperationException(), _user1CurrentCard ?? throw new InvalidOperationException());
+                CompareDamage(c1Damage, c2Damage);
                 _round++;
             }
 
@@ -189,8 +107,8 @@ namespace MonsterTradingCardsGame.Battle
 
             GameEnd();
             _log.WriteLog(_log.GetLog());
-            var U1Elo = CalculateEloRating(_user1.Elo, _user2.Elo, _user1.Deck.Count == 0 ? 0 : (_user2.Deck.Count == 0 ? 1 : 0.5));
-            var U2Elo = CalculateEloRating(_user2.Elo, _user1.Elo, _user2.Deck.Count == 0 ? 0 : (_user1.Deck.Count == 0 ? 1 : 0.5));
+            var U1Elo = _calc.CalculateEloRating(_user1.Elo, _user2.Elo, _user1.Deck.Count == 0 ? 0 : (_user2.Deck.Count == 0 ? 1 : 0.5));
+            var U2Elo = _calc.CalculateEloRating(_user2.Elo, _user1.Elo, _user2.Deck.Count == 0 ? 0 : (_user1.Deck.Count == 0 ? 1 : 0.5));
             return (_log.GetLog(), U1Elo, U2Elo);
         }
     }

@@ -75,7 +75,7 @@ namespace MonsterTradingCardsGameTesting
         }
 
         // check if card can be used when it's actually locked for trade
-        // 
+        // try login 3 times get banned
 
         
     }

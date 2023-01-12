@@ -20,9 +20,7 @@ namespace MonsterTradingCardsGame.Battle
         private NpgsqlConnection _conn = null!;
         private dynamic? _celo1 = 0, _celo2 = 0;
         private (string, int, int) _battleLog;
-
         private readonly ConcurrentDictionary<string, string> _gameResults = new();
-        //private readonly NpgsqlConnection _conn = new();
 
         private void PlayGame()
         {

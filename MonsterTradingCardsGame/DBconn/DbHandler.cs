@@ -42,12 +42,13 @@ namespace MonsterTradingCardsGame.DbConn
                 //    throw new Exception("Error: Query not successful");
                 //}
                 //return CreateHttpResponse(HttpStatusCode.OK, "Could not create package!");
+
                 return true;
 
             }
             catch (Exception e)
             {
-                throw new Exception(e.Message); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
+                throw new Exception(e.Message); // CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
             }
         }
 
