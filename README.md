@@ -2,8 +2,8 @@ MonsterTradingCardsGame
 
 TODO:
 - Unit Tests
-- Mandatory feature: Ban after 3 tries
-- Lock Card for trade
+- General checkup
+- DONE DONE Mandatory feature: Ban after 3 tries
 - Handling vereinheitlichen:
     DONE DONE SELECT multirow 
     DONE DONE SELECT 1 row
@@ -41,9 +41,6 @@ TODO:
         DONE DONE delete trading deals
     DONE DONE Authorization
     DONE DONE Card+Monster type
-- Optional:
-    Win/Lose Ratio
-    ELO myb?
 
 
 - Errors:

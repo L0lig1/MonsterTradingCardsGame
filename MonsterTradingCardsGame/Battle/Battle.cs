@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using MonsterTradingCardsGame;
-using MonsterTradingCardsGame.StoreNamespace;
-using MonsterTradingCardsGame.CardNamespace;
+﻿using MonsterTradingCardsGame.CardNamespace;
 using MonsterTradingCardsGame.LogsManagement;
 using user;
+
 
 namespace MonsterTradingCardsGame.Battle
 {
@@ -72,8 +65,8 @@ namespace MonsterTradingCardsGame.Battle
         {
             return playerRating switch
             {
-                < 2100 => 32,
-                < 2400 => 24,
+                < 100 => 32,
+                < 200 => 24,
                 _ => 16
             };
         }
@@ -175,7 +168,7 @@ namespace MonsterTradingCardsGame.Battle
                 }
                 c1Damage = CalculateDamage(_user1CurrentCard ?? throw new InvalidOperationException(), _user2CurrentCard ?? throw new InvalidOperationException());
                 c2Damage = CalculateDamage(_user2CurrentCard ?? throw new InvalidOperationException(), _user1CurrentCard ?? throw new InvalidOperationException());
-                if (c1Damage > c2Damage) 
+                if (c1Damage > c2Damage)
                 {
                     FightResult(_user1, _user1CurrentCard, c1Damage, _user2, _user2CurrentCard, c2Damage, false);
                 }
@@ -191,6 +184,7 @@ namespace MonsterTradingCardsGame.Battle
                 _round++;
             }
 
+            _round--;
             PrintDecks("after");
 
             GameEnd();

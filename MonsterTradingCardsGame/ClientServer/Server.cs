@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.ClientServer.Http;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 

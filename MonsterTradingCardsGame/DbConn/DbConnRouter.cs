@@ -2,6 +2,7 @@
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 using System.Net;
+using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.Battle;
 using MonsterTradingCardsGame.ClientServer;
 using MonsterTradingCardsGame.DbConn.Tables;
@@ -81,6 +82,24 @@ namespace MonsterTradingCardsGame.DbConn
             }
         }
 
+        public HttpResponse Route(string url, HttpRequest request, AuthorizationHandler _authHandler)
+        {
+            return url switch
+            {
+                "battles" => BattleRoute(request),
+                "users" => UserRoute(request),
+                "sessions" => SessionRoute(request, _authHandler),
+                "packages" => PackagesRoute(request),
+                "transactions" => TransactionsRoute(request),
+                "cards" => CardsRoute(request),
+                "deck" => DeckRoute(request),
+                "stats" => StatsRoute(request),
+                "score" => ScoreRoute(),
+                "tradings" => TradingsRoute(request),
+                _ => CreateHttpResponse(HttpStatusCode.NotFound, "Invalid request")
+            };
+        }
+
         public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
         {
             return new HttpResponse
@@ -134,12 +153,12 @@ namespace MonsterTradingCardsGame.DbConn
             {
                 if (resp.Header.StatusCode == HttpStatusCode.OK)
                 { 
-                    authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now.AddMinutes(59), 1);
+                    authHandler._authorization[username] = new Authorization.Authorization(DateTime.Now.AddMinutes(59), 1);
                     // if username tried already
                 }
                 else
                 {
-                    authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now, 1);
+                    authHandler._authorization[username] = new Authorization.Authorization(DateTime.Now, 1);
                 }
                 // if username tried already
             }

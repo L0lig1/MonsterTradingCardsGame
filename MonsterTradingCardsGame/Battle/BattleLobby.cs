@@ -76,14 +76,6 @@ namespace MonsterTradingCardsGame.Battle
                 }
 
                 return _battleLog.Item1;
-                /*
-                 * Battle:
-                 * 2 User class
-                 * Get Decks 
-                 * Fill Deck Class with Cards
-                 *
-                 */
-                // when battle over, give result to each thread
             }
             catch (Exception e)
             {
