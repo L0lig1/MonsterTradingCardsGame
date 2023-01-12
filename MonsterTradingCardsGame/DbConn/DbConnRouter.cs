@@ -71,7 +71,14 @@ namespace MonsterTradingCardsGame.DbConn
 
         public void Disconnect()
         {
-            Conn?.Close();
+            try
+            {
+                Conn?.Close();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)

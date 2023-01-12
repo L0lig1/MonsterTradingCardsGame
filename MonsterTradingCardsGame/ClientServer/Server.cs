@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using MonsterTradingCardsGame.ClientServer.Http;
+using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 
 namespace MonsterTradingCardsGame.ClientServer
@@ -50,44 +51,55 @@ namespace MonsterTradingCardsGame.ClientServer
                 var client = (TcpClient)ct;
 
                 // Buffer for reading data
-                const int bufferSize = 4096;
-                var bytes = new byte[bufferSize];
+
                 Console.WriteLine("Connected!");
 
                 // Get a stream object for reading and writing
                 var stream = client.GetStream();
 
-                var i = 0;
-                var recvData = " ";
-
-                // Loop to receive all the data sent by the client.
-                while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
-                {
-                    // Translate data bytes to a ASCII string.
-                    recvData += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-                    // end zeichen (doesn't work when actual message == buffer size cz flag not init)
-                    if (i is not 0 and < bufferSize)
-                    {
-                        break;
-                    }
-                }
                 // Process the data sent by the client.
+                var request = GetRequest(stream);
+                var response = rh.HandleRequest(ParseHttpData(request), _authorization);
+                WriteResponse(response, stream);
                 
-                var response = rh.HandleRequest(ParseHttpData(recvData), _authorization);
-                object lockFlag = new();
-                lock (lockFlag)
-                {
-                    var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());
-                    
-                    // Send back a response.
-                    stream.Write(msg, 0, msg.Length);
-                }
             }
             catch (SocketException e)
             {
                 Console.WriteLine($"SocketException: {e}");
             }
 
+        }
+
+        private string GetRequest(NetworkStream stream)
+        {
+            var i = 0;
+            var recvData = " ";
+            const int bufferSize = 4096;
+            var bytes = new byte[bufferSize];
+            // Loop to receive all the data sent by the client.
+            while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+            {
+                // Translate data bytes to a ASCII string.
+                recvData += System.Text.Encoding.ASCII.GetString(bytes, 0, i);
+                // end zeichen (doesn't work when actual message == buffer size cz flag not init)
+                if (i is not 0 and < bufferSize)
+                {
+                    break;
+                }
+            }
+            return recvData;
+        }
+
+        private void WriteResponse(HttpResponse response, NetworkStream stream)
+        {
+            object lockFlag = new();
+            lock (lockFlag)
+            {
+                var msg = System.Text.Encoding.ASCII.GetBytes(response.Header.GetResponse() + response.Body?.GetHttpBody());
+
+                // Send back a response.
+                stream.Write(msg, 0, msg.Length);
+            }
         }
 
     }

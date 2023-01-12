@@ -31,7 +31,7 @@ namespace MonsterTradingCardsGame.ClientServer
         public bool IsBanned(string username)
         {
             if (_authorization.ContainsKey(username) && _authorization[username].Tries < 3)
-                return true;
+                return false;
             throw new Exception("User is permanently banned!");
         }
 
