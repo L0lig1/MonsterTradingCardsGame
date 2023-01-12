@@ -11,7 +11,7 @@ namespace MonsterTradingCardsGame.ClientServer
         private const int Port = 10001;
         private static readonly IPAddress LocalAddr = IPAddress.Loopback; // localhost
         private readonly TcpListener _serverSocket = new (LocalAddr, Port);
-        private readonly Dictionary<string, DateTime> _authorization = new();
+        private readonly AuthorizationHandler _authorization = new();
 
         public void Start()
         {

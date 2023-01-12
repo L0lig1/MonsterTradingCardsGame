@@ -2,7 +2,7 @@ MonsterTradingCardsGame
 
 TODO:
 - Unit Tests
-- Mandatory feature
+- Mandatory feature: Ban after 3 tries
 - Lock Card for trade
 - Handling vereinheitlichen:
     DONE DONE SELECT multirow 
@@ -33,7 +33,6 @@ TODO:
         DONE DONE ELO nachm battle
         ---- schau manchmal funktionierts nd
         ---- schau rückgabe 2 thread
-        ---- schau errors
         ---- Deck nach dem Spiel an das Gewinner geben
     Trade:
         DONE DONE Trade (stack funktionen myb in DbStack?)

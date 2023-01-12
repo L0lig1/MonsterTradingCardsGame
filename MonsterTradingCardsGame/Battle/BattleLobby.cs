@@ -47,9 +47,6 @@ namespace MonsterTradingCardsGame.Battle
             _conn = conn;
             try
             {
-                /* dictionary (thread safe) username battlelog, für jeweilige user reinschreiben */
-                // Wait for the other player to join
-                //(string, int, int) battleLog = default;
                 lock (_lockFlag)
                 {
                     _users.Add(username);

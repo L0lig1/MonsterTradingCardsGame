@@ -3,6 +3,7 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 using Npgsql;
 using System.Net;
 using MonsterTradingCardsGame.Battle;
+using MonsterTradingCardsGame.ClientServer;
 using MonsterTradingCardsGame.DbConn.Tables;
 
 
@@ -88,7 +89,8 @@ namespace MonsterTradingCardsGame.DbConn
             {
                 var splitUrl = request.Header.Url.Split('/');
                 var userToken = request.Header.AuthKey?.Split('-')[0];
-                if (splitUrl.Length > 2 && splitUrl[2] != userToken) throw new Exception("Unauthorized!");
+                if ((splitUrl.Length > 2 && splitUrl[2] != userToken) || Conn == null) 
+                    throw new Exception("Unauthorized!");
                 return request.Header.Method switch
                 {
                     "POST" when splitUrl.Length == 2 && request.Body != null && request.Body.Data != null =>
@@ -107,12 +109,14 @@ namespace MonsterTradingCardsGame.DbConn
             }
         }
 
-        public HttpResponse SessionRoute(HttpRequest request, Dictionary<string, DateTime> authorization)
+        public HttpResponse SessionRoute(HttpRequest request, AuthorizationHandler authHandler)
         {
-            HttpResponse resp = _dbUser.LoginUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), Conn);
+            var username = request.Body?.Data?.Username.ToString();
+            HttpResponse resp = _dbUser.LoginUser(username, request.Body?.Data?.Password.ToString(), Conn);
             if (resp.Header.StatusCode == HttpStatusCode.OK)
             {
-                authorization.Add(request.Body?.Data?.Username.ToString(), DateTime.Now.AddMinutes(59));
+                // if username tried already
+                authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now.AddMinutes(59), 1);
             }
             return resp;
         }
