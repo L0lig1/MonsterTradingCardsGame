@@ -113,10 +113,28 @@ namespace MonsterTradingCardsGame.DbConn
         {
             var username = request.Body?.Data?.Username.ToString();
             HttpResponse resp = _dbUser.LoginUser(username, request.Body?.Data?.Password.ToString(), Conn);
-            if (resp.Header.StatusCode == HttpStatusCode.OK)
+            if (authHandler._authorization.ContainsKey(username))
             {
+                authHandler._authorization[username].Tries++;
+                if (resp.Header.StatusCode == HttpStatusCode.OK && !authHandler.IsBanned(username))
+                {
+                    authHandler._authorization[username].LoggedInUntil = DateTime.Now.AddMinutes(59);
+                    // if username tried already
+                }
+                
+            }
+            else
+            {
+                if (resp.Header.StatusCode == HttpStatusCode.OK)
+                { 
+                    authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now.AddMinutes(59), 1);
+                    // if username tried already
+                }
+                else
+                {
+                    authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now, 1);
+                }
                 // if username tried already
-                authHandler._authorization[username] = new ClientServer.Authorization(DateTime.Now.AddMinutes(59), 1);
             }
             return resp;
         }

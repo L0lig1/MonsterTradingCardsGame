@@ -23,13 +23,12 @@ namespace MonsterTradingCardsGame.ClientServer
 
         private bool IsLoggedIn(string username)
         {
-            _authorization[username].Tries++;
             if(_authorization.ContainsKey(username) && _authorization[username].LoggedInUntil > DateTime.Now)
                 return true;
             throw new Exception("User is not Logged in!");
         }
 
-        private bool IsBanned(string username)
+        public bool IsBanned(string username)
         {
             if (_authorization.ContainsKey(username) && _authorization[username].Tries < 3)
                 return true;
