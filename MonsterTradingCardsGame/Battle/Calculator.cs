@@ -57,18 +57,18 @@ namespace MonsterTradingCardsGame.Battle
         {
             if
             (
-                (attackingCard.CardType == "monster" && defendingCard.CardType == "monster") ||
-                (attackingCard.Name == "Goblin" && defendingCard.Name == "Dragon") ||
+                (attackingCard.Name.Contains("Goblin") && defendingCard.Name == "Dragon") ||
                 (attackingCard.Name == "Ork" && defendingCard.Name == "Wizzard") ||
                 (defendingCard.Name == "Kraken" && attackingCard.CardType == "spell") ||
-                (attackingCard.Name == "FireElf" && defendingCard.Name == "Dragon")
+                (attackingCard.Name == "Dragon" && defendingCard.Name == "FireElf") ||
+                (attackingCard.Name == "Knight" && defendingCard.Name == "WaterSpell")
             )
             {
-                return (true, attackingCard.Damage);
-            }
-            if (attackingCard.CardType == "Knight" && defendingCard.Name == "WaterSpell")
-            {
                 return (true, 0);
+            }
+            if (attackingCard.CardType == "monster" && defendingCard.CardType == "monster")
+            {
+                return (true, attackingCard.Damage);
             }
             return (false, defendingCard.Damage);
         }
