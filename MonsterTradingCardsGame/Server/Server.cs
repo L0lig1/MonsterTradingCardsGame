@@ -1,15 +1,16 @@
 using System.Net;
 using System.Net.Sockets;
 using MonsterTradingCardsGame.Authorization;
+using MonsterTradingCardsGame.ClientServer;
 using MonsterTradingCardsGame.ClientServer.Http;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
+using HttpResponseHeader = MonsterTradingCardsGame.ClientServer.Http.Response.HttpResponseHeader;
 
 
-namespace MonsterTradingCardsGame.ClientServer
+namespace MonsterTradingCardsGame.Server
 {
     internal class Server : HttpParser
     {
-
         private const int Port = 10001;
         private static readonly IPAddress LocalAddr = IPAddress.Loopback; // localhost
         private readonly TcpListener _serverSocket = new (LocalAddr, Port);
@@ -51,27 +52,30 @@ namespace MonsterTradingCardsGame.ClientServer
                 if (ct == null) throw new Exception("Server error");
                 var client = (TcpClient)ct;
 
-                // Buffer for reading data
-
                 Console.WriteLine("Connected!");
-
-                // Get a stream object for reading and writing
+                
                 var stream = client.GetStream();
 
                 // Process the data sent by the client.
                 var request = GetRequest(stream);
-                var response = rh.HandleRequest(ParseHttpData(request), _authorization);
-                WriteResponse(response, stream);
-                
+                var parsedRequest = ParseHttpData(request);
+                if (parsedRequest.IsValid)
+                {
+                    var response = rh.HandleRequest(parsedRequest, _authorization);
+                    WriteResponse(response, stream);
+                }
+                else
+                {
+                    WriteResponse(new HttpResponse{Header = new HttpResponseHeader(HttpStatusCode.BadRequest, "text/plain", 16), Body = new HttpResponseBody("Invalid Request!")}, stream);
+                }
             }
             catch (SocketException e)
             {
                 Console.WriteLine($"SocketException: {e}");
             }
-
         }
 
-        private string GetRequest(NetworkStream stream)
+        private string GetRequest(Stream stream)
         {
             var i = 0;
             var recvData = " ";

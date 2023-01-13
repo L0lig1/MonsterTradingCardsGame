@@ -1,6 +1,5 @@
-﻿using MonsterTradingCardsGame.ClientServer.Http.Response;
-using Npgsql;
-using System.Net;
+﻿using System.Net;
+using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 
 namespace MonsterTradingCardsGame.DbConn.Tables
@@ -10,11 +9,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 
         private readonly DbCards _dbCards = new();
 
-        public bool DeletePackage(string pId, NpgsqlConnection conn)
+        public bool DeletePackage(string pId)
         {
             try
             {
-                return ExecNonQuery(Sql.Commands["DeletePackage"], new string[,]{{"p_id", pId}}, conn) ? true : throw new Exception("FJASLN");
+                return ExecNonQuery(Sql.Commands["DeletePackage"], new string[,]{{"p_id", pId}}) ? true : throw new Exception();
             }
             catch (Exception e)
             {
@@ -23,11 +22,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public string SelectRandomPackageId(NpgsqlConnection conn)
+        public string SelectRandomPackageId()
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["SelectRandomPackageId"], 1, null, null, conn, true);
+                var resp = ExecQuery(Sql.Commands["SelectRandomPackageId"], 1, null, null, true);
                 return resp.Item1
                     ? resp.Item2
                     : throw new Exception("There are no packages in the store");
@@ -38,12 +37,12 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public string[] GetPackageByRandId(NpgsqlConnection conn)
+        public string[] GetPackageByRandId()
         {
             try
             {
-                var pId = SelectRandomPackageId(conn);
-                var resp = ExecQuery(Sql.Commands["GetPackage"], 2, null, new string[,]{{"p_id", pId } }, conn, true);
+                var pId = SelectRandomPackageId();
+                var resp = ExecQuery(Sql.Commands["GetPackage"], 2, null, new string[,]{{"p_id", pId } }, true);
                 return resp.Item1
                     ? resp.Item2.Split(Environment.NewLine)
                     : throw new Exception("Could not get packages!");
@@ -69,7 +68,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             return new string(stringChars);
         }
 
-        public HttpResponse CreatePackage(dynamic cards, NpgsqlConnection conn)
+        public HttpResponse CreatePackage(dynamic cards)
         {
             var packageId = GetRandomString();
 
@@ -77,11 +76,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             {
                 try
                 {
-                    if (!ExecNonQuery(Sql.Commands["CreatePackage"], new string[,] { { "p_id", packageId }, { "c_id", card.Id.ToString() } }, conn))
+                    if (!ExecNonQuery(Sql.Commands["CreatePackage"], new string[,] { { "p_id", packageId }, { "c_id", card.Id.ToString() } }))
                     {
                         throw new Exception("Didn't work");
                     }
-                    _dbCards.CreateCard(card.Id.ToString(), card.Name.ToString(), (int)card.Damage, conn);
+                    _dbCards.CreateCard(card.Id.ToString(), card.Name.ToString(), (int)card.Damage);
                 }
                 catch (Exception e)
                 {
@@ -95,5 +94,6 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 
             return CreateHttpResponse(HttpStatusCode.Created, "Package created!");
         }
+
     }
 }

@@ -1,13 +1,21 @@
-﻿
-namespace MonsterTradingCardsGame.ClientServer.Http.Request
+﻿namespace MonsterTradingCardsGame.ClientServer.Http.Request
 {
     public class HttpRequestHeader
     {
+        public HttpRequestHeader(string httpVersion, string method, string url, string? authType, string? authKey, string? user)
+        {
+            HttpVersion = httpVersion;
+            Method = method;
+            Url = url;
+            AuthType = authType;
+            AuthKey = authKey;
+            User = user;
+        }
+
         private readonly string[] _validHttpMethods = { "GET", "POST", "PUT", "DELETE" };
         private readonly string[] _validAuthTypes = { "Basic" };
         private string? _authType;
         private string  _method = string.Empty;
-        private string  _url = string.Empty;
         private string? _user = string.Empty;
 
         public string Method
@@ -42,21 +50,7 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Request
             }
         }
 
-        public string Url
-        {
-            get => _url;
-            set
-            {
-                //if (Uri.TryCreate(value, UriKind.Absolute, out var uriResult) && uriResult.Scheme == Uri.UriSchemeHttp)
-                //{
-                    _url = value; // check for valid url
-                //}
-                //else
-                //{
-                    // throw invalidurlexception
-                //}
-            }
-        }
+        public string Url { get; set; } = string.Empty;
 
         public string HttpVersion { get; set; }
 
@@ -72,14 +66,5 @@ namespace MonsterTradingCardsGame.ClientServer.Http.Request
             }
         }
 
-        public HttpRequestHeader(string httpVersion, string method, string url, string? authType, string? authKey, string? user)
-        {
-            HttpVersion = httpVersion;
-            Method = method;
-            Url = url;
-            AuthType = authType;
-            AuthKey = authKey;
-            User = user;
-        }
     }
 }

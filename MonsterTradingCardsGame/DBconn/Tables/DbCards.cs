@@ -5,7 +5,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbCards : DbHandler
     {
-        public bool CreateCard(string id, string name, int dmg, NpgsqlConnection conn)
+        public bool CreateCard(string id, string name, int dmg)
         {
             try
             {
@@ -16,7 +16,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                         { "c_id", id }, 
                         { "ct", GetCardTypeFromName(name)},
                         { "et", GetElemTypeFromName(name)}
-                    }, conn) 
+                    }) 
                     ? true 
                     : throw new Exception("AJKDBG");
             }

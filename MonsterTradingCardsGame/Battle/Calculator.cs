@@ -80,5 +80,6 @@ namespace MonsterTradingCardsGame.Battle
                 ? cardtypedmg.Item2
                 : CalculateDmgElementType(attackingCard, defendingCard);
         }
+
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System.Net.Mime;
+using Newtonsoft.Json;
 using MonsterTradingCardsGame.ClientServer.Http.Request;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
-using Newtonsoft.Json;
+
 
 namespace MonsterTradingCardsGame.ClientServer.Http
 {
-    internal class HttpParser
+    public class HttpParser
     {
-
-        public static Request.HttpRequest ParseHttpData(string request)
+        public Request.HttpRequest ParseHttpData(string request)
         {
             string method = string.Empty, httpVersion = string.Empty, url = string.Empty;
             string? authorizationKey = string.Empty, user = string.Empty, authorizationType = string.Empty;
@@ -45,13 +45,19 @@ namespace MonsterTradingCardsGame.ClientServer.Http
                 return new HttpRequest
                 {
                     Header = new HttpRequestHeader(httpVersion, method, url, authorizationType, authorizationKey, user),
-                    Body = new HttpRequestBody(data)
+                    Body = new HttpRequestBody(data),
+                    IsValid = true
                 };
             }
             catch (Exception e)
             {
                 Console.WriteLine(e);
-                throw;
+                return new HttpRequest
+                {
+                    Header = new HttpRequestHeader(httpVersion, method, url, authorizationType, authorizationKey, user),
+                    Body = new HttpRequestBody(data),
+                    IsValid = false
+                };
             }
         }
 

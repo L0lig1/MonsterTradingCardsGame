@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
-using Npgsql;
+
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
     public class DbTradings : DbHandler
     {
-        private DbStack _dbStack = new();
+        private readonly DbStack _dbStack = new();
         private static string ParseTradingDeal(string td)
         {
             var resp = "";
@@ -26,11 +21,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             return resp;
         }
 
-        public HttpResponse GetTradingDeals(NpgsqlConnection conn)
+        public HttpResponse GetTradingDeals()
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{4}, null, conn, true);
+                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{4}, null, true);
                 return resp.Item1
                     ? CreateHttpResponse(HttpStatusCode.OK, ParseTradingDeal(resp.Item2))
                     : throw new Exception("There are no deals currently!");
@@ -41,19 +36,18 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public HttpResponse CreateTradingDeal(string user, dynamic bodyData, NpgsqlConnection conn)
+        public HttpResponse CreateTradingDeal(string user, dynamic bodyData)
         {
             try
             {
-                ExecNonQuery(Sql.Commands["LockCardForTrade"], new string[,] { { "user", user }, { "card", bodyData.CardToTrade } }, conn);
+                ExecNonQuery(Sql.Commands["LockCardForTrade"], new string[,] { { "user", user }, { "card", bodyData.CardToTrade } });
                 return ExecNonQuery(
                     Sql.Commands["CreateTradingDeal"],
                     new string[,]
                     {
                         { "tid", bodyData.Id }, { "ctt", bodyData.CardToTrade }, { "ct", bodyData.Type },
                         { "dmg", bodyData.MinimumDamage.ToString() }, { "user", user }
-                    }, 
-                    conn
+                    }
                 )
                     ? CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Created successfully")
                     : CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while creating trading deal");
@@ -64,35 +58,32 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public HttpResponse DeleteTradingDeal(string tId, NpgsqlConnection conn)
+        public HttpResponse DeleteTradingDeal(string tId)
         {
-            return ExecNonQuery(Sql.Commands["DeleteTradingDeal"], new [,]{ { "tid", tId } }, conn)
+            return ExecNonQuery(Sql.Commands["DeleteTradingDeal"], new [,]{ { "tid", tId } })
                 ? CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Deleted successfully")
                 : CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while deleting trading deal");
         }
 
-        public HttpResponse Trade(string tradeId, string t2CardToTrade, string t2User, NpgsqlConnection conn)
+        public HttpResponse Trade(string tradeId, string t2CardToTrade, string t2User)
         {
             try
             {
-
                 // get trading deal (if exists)
                 var tradee1  = ExecQuery(
                     Sql.Commands["GetTradingDealById"], 
                     5, 
                     new[] {2,3},
-                    new[,] { { "tid", tradeId } }, 
-                    conn, 
+                    new[,] { { "tid", tradeId } },
                     true
                 );
                 
                 // get cardToTrade (if exists)
                 var tradee2 = ExecQuery(
-                    Sql.Commands["GetCardFromStackById"], 
+                    Sql.Commands["GetCardAllFromStackById"], 
                     4, 
                     new []{2,3},
-                    new [,]{{"user", t2User}, {"card", t2CardToTrade}}, 
-                    conn, 
+                    new [,]{{"user", t2User}, {"card", t2CardToTrade}},
                     true
                 );
                 
@@ -125,15 +116,15 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 
                 // if successful
                 // amount == 1 ? DELETE delete card from stack : amount - 1
-                _dbStack.RemoveCardFromStackById(trade1Split[4], trade1Split[0], int.Parse(trade1Split[3]), conn);
-                _dbStack.RemoveCardFromStackById(t2CardToTrade, t2User, int.Parse(trade2Split[3]), conn);
+                _dbStack.RemoveCardFromStackById(trade1Split[4], trade1Split[0], int.Parse(trade1Split[3]));
+                _dbStack.RemoveCardFromStackById(t2CardToTrade, t2User, int.Parse(trade2Split[3]));
 
                 // add each card to each stack
-                _dbStack.AddCardToStack(trade1Split[0], t2CardToTrade, conn);
-                _dbStack.AddCardToStack(t2User, trade1Split[4], conn);
+                _dbStack.AddCardToStack(trade1Split[0], t2CardToTrade);
+                _dbStack.AddCardToStack(t2User, trade1Split[4]);
 
                 // delete Trading deal
-                DeleteTradingDeal(tradeId, conn);
+                DeleteTradingDeal(tradeId);
 
                 return CreateHttpResponse(HttpStatusCode.OK, "Trade successful!");
             }

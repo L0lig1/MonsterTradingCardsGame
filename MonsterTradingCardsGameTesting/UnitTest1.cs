@@ -1,22 +1,40 @@
 using System;
-using MonsterTradingCardsGame.Authorization;
+using System.Net;
 using NUnit.Framework;
+using Newtonsoft.Json;
 using MonsterTradingCardsGame.Battle;
+using MonsterTradingCardsGame.DbConn;
+using MonsterTradingCardsGame.Server;
+using MonsterTradingCardsGame.DbConn.Tables;
+using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.CardNamespace;
+using MonsterTradingCardsGame.ClientServer.Http;
+using MonsterTradingCardsGame.ClientServer.Http.Request;
 using Authorization = MonsterTradingCardsGame.Authorization.Authorization;
+using HttpRequestHeader = MonsterTradingCardsGame.ClientServer.Http.Request.HttpRequestHeader;
 
 
 namespace MonsterTradingCardsGameTesting
 {
-
-    public interface INpgsqlConnection
-    {
-        int Execute(string command, object[] parameters);
-    }
-
+    
     public class Tests
     {
+        readonly string nl = Environment.NewLine;
 
+        [Test]
+        public void TestBattleCalculateElo()
+        {
+            // Arrange
+            const int playerARating = 100;
+            const int playerBRating = 100;
+
+            // Act
+            var playerANewRating = new Calculator().CalculateEloRating(playerARating, playerBRating, 1);
+            var playerBNewRating = new Calculator().CalculateEloRating(playerBRating, playerARating, 0);
+
+            // Assert
+            Assert.Greater(playerANewRating, playerBNewRating);
+        }
 
         [Test]
         public void TestBattleCalculatorSpellVsSpell()
@@ -167,61 +185,213 @@ namespace MonsterTradingCardsGameTesting
             Assert.AreEqual(false, isAuthorized);
         }
 
-
-
-
         [Test]
-        public void Test1()
-        {
-            
-
-        }
-
-        // check if card can be used when it's actually locked for trade
-        // try login 3 times get banned
-
-        
-    }
-}
-        /*
-        [SetUp]
-        public void Setup()
-        {
-
-        }
-
-        [SetUp]
-        public void RegisterUser_ValidInput_ReturnsSuccess()
+        public void TestRoutingRequestWrongData()
         {
             // Arrange
-            var username = "testuser";
-            var password = "password";
-            var db = new Router();
-            //using var mock = AutoMock.GetLoose();
-            db.Connect();
+            dynamic data = new System.Dynamic.ExpandoObject();
+            var router = new Router();
+            var req = new HttpRequest
+            {
+                Header = new HttpRequestHeader("1.1", "GET", "/users", "Basic", "kienboec-mtcg", "kienboec"),
+                Body = new HttpRequestBody(data)
+            };
 
             // Act
-            var response = new DbUsers().RegisterUser(username, password, db.Conn);
+            var resp = router.Route("users", req, new AuthorizationHandler());
 
             // Assert
-            Assert.AreEqual(HttpStatusCode.Created, response.Header.StatusCode);
-            Assert.AreEqual("User has been registered", response.Body?.Data);
+            Assert.AreEqual(HttpStatusCode.BadRequest, resp.Header.StatusCode);
+            Assert.AreEqual("Error: Invalid request!", resp.Body?.Data);
         }
 
-        [SetUp]
-        public void RegisterUser_DuplicateUsername_ReturnsConflict()
+        [Test]
+        public void TestRoutingRequestWrongMethod()
         {
             // Arrange
-            var username = "testuser";
-            var password = "password";
-            var db = new Router();
-            db.Connect();
-            var mockConnection = new Mock<INpgsqlConnection>();
-            mockConnection.Setup(conn => conn.Execute(It.IsAny<string>(), It.IsAny<object[]>()))
-                          .Throws(new Exception("23505: duplicate key value violates unique constraint"));
-            //Act
-            var response = new DbUsers().RegisterUser(username, password, db.Conn);
-            //Assert
-            Assert.AreEqual(HttpStatusCode.Conflict, response.Header.StatusCode);
-            Assert.AreEqual("User with that username already exists!", response.Body?.Data);
-        }*/
+            dynamic data = new System.Dynamic.ExpandoObject();
+            var router = new Router();
+            var db = new DbHandler();
+            var req = new HttpRequest
+            {
+                Header = new HttpRequestHeader("1.1", "DELETE", "/users", "Basic", "kienboec-mtcg", "kienboec"),
+                Body = new HttpRequestBody(data)
+            };
+
+            // Act
+            var resp = router.Route("users", req, new AuthorizationHandler());
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, resp.Header.StatusCode);
+            Assert.AreEqual("Error: Invalid request!", resp.Body?.Data);
+        }
+        
+        [Test]
+        public void TestParserValidRequest()
+        {
+            // Arrange
+            var req = $"POST /users HTTP/1.1{nl}content-length: 20{nl}content-type: application/json{nl}{nl}" + "{\"Id\":1}";
+            var parser = new HttpParser();
+
+            // Act
+            var parsedReq = parser.ParseHttpData(req);
+
+            // Assert
+            Assert.AreEqual("POST", parsedReq.Header.Method);
+            Assert.AreEqual("1.1", parsedReq.Header.HttpVersion);
+            Assert.AreEqual("/users", parsedReq.Header.Url);
+            Assert.AreEqual(1, (int)parsedReq.Body?.Data?.Id.Value);
+            Assert.AreEqual(true, parsedReq.IsValid);
+        }
+
+        [Test]
+        public void TestParserInvalidRequest()
+        {
+            // Arrange
+            var nl = Environment.NewLine;
+            var req = $"POST /users HTTP/1.1{nl}content-length: 20{nl}content-type: application/json" + "{\"Id\":1}";
+            var parser = new HttpParser();
+
+            // Act
+            var parsedReq = parser.ParseHttpData(req);
+
+            // Assert
+            Assert.AreEqual(false, parsedReq.IsValid);
+
+        }
+
+        private Db _db = new();
+        private readonly DbHandler _dH = new();
+        private DbUsers _dbUser = new();
+        private readonly DbStack _dbStack = new();
+        private DbCards _dbCard = new();
+        private DbPackages _dbPackages = new();
+        
+        [Test]
+        public void TestDbUseAllCoins()
+        {
+            // Arrange
+            _db = new Db();
+            _dbUser = new DbUsers();
+
+            // Act
+            _db.TruncateAll();
+            _dbUser.RegisterUser("testuser", "test");
+            _dbUser.UseCoins("testuser", 5);
+            _dbUser.UseCoins("testuser", 5);
+            _dbUser.UseCoins("testuser", 5);
+            _dbUser.UseCoins("testuser", 5);
+            var res = string.Empty;
+            try
+            {
+                _dbUser.HasEnoughCoins("testuser");
+            }
+            catch (Exception e)
+            {
+                res = e.Message;
+            }
+
+            // Assert
+            Assert.AreEqual("Not enough coins! You have 0, but should at least have 5", res);
+        }
+        
+        [Test]
+        public void TestDbCreateDuplicateUser()
+        {
+            // Arrange
+            _db = new Db();
+            _dbUser = new DbUsers();
+
+            // Act
+            _db.TruncateAll();
+            _dbUser.RegisterUser("testuser", "test");
+            var res = _dbUser.RegisterUser("testuser", "test");
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Conflict, res.Header.StatusCode);
+            Assert.AreEqual("User with that username already exists!", res.Body?.Data);
+        }  
+
+        [Test]
+        public void TestDbCreateCard()
+        {
+            // Arrange
+            _db = new Db();
+            _dbCard = new DbCards();
+
+            // Act
+            _db.TruncateAll();
+            var createCard = _dbCard.CreateCard("cardid", "WaterSpell", 50);
+
+            // Assert
+            Assert.AreEqual(true, createCard);
+        }
+
+        [Test]
+        public void TestDbCreateCardAndAddToStack()
+        {
+            // Arrange
+            _db.TruncateAll();
+            _dbUser.RegisterUser("testuser", "test");
+            _dbCard.CreateCard("cardid", "WaterSpell", 50);
+
+            // Act
+            var addCardToStack = _dbStack.AddCardToStack("testuser", "cardid");
+            var getStack = _dbStack.ShowStack("testuser");
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, addCardToStack.Header.StatusCode);
+            Assert.AreEqual("WaterSpell", getStack.Body?.Data);
+        }
+
+        [Test]
+        public void TestDbCreateTradingDealAndCheckIfCardIsLocked()
+        {
+            // Arrange
+            dynamic cardList = JsonConvert.DeserializeObject("[\"1\", \"2\", \"3\", \"4\"]") ?? throw new InvalidOperationException();
+            _db.TruncateAll();
+            _dbUser.RegisterUser("testuser", "test");
+            _dbCard.CreateCard("1", "WaterSpell", 50);
+            _dbCard.CreateCard("2", "WaterSpell", 50);
+            _dbCard.CreateCard("3", "WaterSpell", 50);
+            _dbCard.CreateCard("4", "WaterSpell", 50);
+            _dbStack.AddCardToStack("testuser", "1");
+            _dbStack.AddCardToStack("testuser", "2");
+            _dbStack.AddCardToStack("testuser", "3");
+            _dbStack.AddCardToStack("testuser", "4");
+            _dbStack.ShowStack("testuser");
+            _dH.ExecNonQuery(_dH.Sql.Commands["LockCardForTrade"], new [,] { { "user", "testuser" }, { "card", "1" } });
+
+            // Act
+            var configDeck = _dbStack.ConfigureDeck("testuser", cardList);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Conflict, configDeck.Header.StatusCode); // can't get card in deck (locked)
+        }        
+        
+        [Test]
+        public void TestDbInsufficientCardsForDeckConfig()
+        {
+            // Arrange
+            dynamic cardList = JsonConvert.DeserializeObject("[\"1\", \"2\", \"3\"]") ?? throw new InvalidOperationException();
+            _db.TruncateAll();
+            _dbUser.RegisterUser("testuser", "test");
+            _dbCard.CreateCard("1", "WaterSpell", 50);
+            _dbCard.CreateCard("2", "WaterSpell", 50);
+            _dbCard.CreateCard("3", "WaterSpell", 50);
+            _dbCard.CreateCard("4", "WaterSpell", 50);
+            _dbStack.AddCardToStack("testuser", "1");
+            _dbStack.AddCardToStack("testuser", "2");
+            _dbStack.AddCardToStack("testuser", "3");
+            _dbStack.AddCardToStack("testuser", "4");
+
+            // Act
+            var configDeck = _dbStack.ConfigureDeck("testuser", cardList);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Conflict, configDeck.Header.StatusCode); // only 3 cards provided
+        }
+
+    }
+}
+ 

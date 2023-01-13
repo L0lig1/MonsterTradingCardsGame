@@ -1,23 +1,17 @@
 ﻿using System.Collections.Concurrent;
 using MonsterTradingCardsGame.DbConn.Tables;
-using Npgsql;
-using user;
+using MonsterTradingCardsGame.Users;
 
 
 namespace MonsterTradingCardsGame.Battle
 {
     public class BattleLobby
     {
-
-        // A flag to track when both players have joined
         public bool OnePlayerJoined = false;
-
-        // A lock to synchronize access to the flag
         private readonly object _lockFlag = new();
         private readonly DbUsers _dbUser = new();
         private readonly DbStack _dbStack = new();
         private readonly List<string> _users = new();
-        private NpgsqlConnection _conn = null!;
         private dynamic? _celo1 = 0, _celo2 = 0;
         private (string, int, int) _battleLog;
         private readonly ConcurrentDictionary<string, string> _gameResults = new();
@@ -26,8 +20,8 @@ namespace MonsterTradingCardsGame.Battle
         {
             Console.WriteLine("Game starting!");
             var battle = new Battle(
-                new User(_users[0], _dbStack.GetDeck(_users[0], _conn), _celo1),
-                new User(_users[1], _dbStack.GetDeck(_users[1], _conn), _celo2)
+                new User(_users[0], _dbStack.GetDeck(_users[0]), _celo1),
+                new User(_users[1], _dbStack.GetDeck(_users[1]), _celo2)
             );
             _battleLog = battle.Fight();
             Console.WriteLine(_battleLog.Item1 + Environment.NewLine + _battleLog.Item2 + Environment.NewLine + _battleLog.Item3);
@@ -35,14 +29,12 @@ namespace MonsterTradingCardsGame.Battle
 
         private void BattleResult(string username, int elo)
         {
-            _dbUser.UpdateUserStats(username, elo, _conn);
+            _dbUser.UpdateUserStats(username, elo);
             _gameResults.TryAdd(username, _battleLog.Item1);
         }
 
-
-        public string StartLobby(NpgsqlConnection conn, string username)
+        public string StartLobby(string username)
         {
-            _conn = conn;
             try
             {
                 lock (_lockFlag)
@@ -50,7 +42,7 @@ namespace MonsterTradingCardsGame.Battle
                     _users.Add(username);
                     if (!OnePlayerJoined)
                     {
-                        _celo1 = int.Parse(_dbUser.UserStats(username, _conn).Body?.Data);
+                        _celo1 = int.Parse(_dbUser.UserStats(username).Body?.Data);
                         OnePlayerJoined = true;
                         Monitor.Wait(_lockFlag);
                         if (_gameResults.ContainsKey(_users[0]))
@@ -61,7 +53,7 @@ namespace MonsterTradingCardsGame.Battle
                     {
                         // Both players have joined, start the game!
 
-                        _celo2 = int.Parse(_dbUser.UserStats(username, _conn).Body?.Data);
+                        _celo2 = int.Parse(_dbUser.UserStats(username).Body?.Data);
 
                         PlayGame();
                         BattleResult(_users[0], _battleLog.Item2);

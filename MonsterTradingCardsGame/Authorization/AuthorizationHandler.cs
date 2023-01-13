@@ -1,5 +1,6 @@
 ﻿using MonsterTradingCardsGame.ClientServer.Http.Request;
 
+
 namespace MonsterTradingCardsGame.Authorization
 {
     public class Authorization
@@ -54,5 +55,6 @@ namespace MonsterTradingCardsGame.Authorization
                 throw new Exception($"Authorization failed: {e.Message}");
             }
         }
+
     }
 }

@@ -17,14 +17,14 @@
   <Class Name="MonsterTradingCardsGame.Battle.Battle" Collapsed="true">
     <Position X="21.5" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAIAEgBAAAIAAkAAgEAAIEAACAAEAAQAQA=</HashCode>
+      <HashCode>AAAAAAIAAAAIAEgBAAAIAAAAAgAAgIAAACAAAAAQAAA=</HashCode>
       <FileName>Battle\Battle.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.Battle.BattleLobby" Collapsed="true">
     <Position X="23.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>gQAAAAAAAAIIAAABAAAAAAAAAhAAAIBAAACAEAAAIAA=</HashCode>
+      <HashCode>gQAAAAAAAAIIAAABAAAAAAAAAhAAAIBAAACAAAAAIAA=</HashCode>
       <FileName>Battle\BattleLobby.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -45,64 +45,64 @@
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Request.HttpRequest" Collapsed="true">
     <Position X="21.5" Y="2.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>BAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\Http\Request\HttpRequest.cs</FileName>
+      <HashCode>BAAAAAAAAAAAAAAAAAgBAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Http\Request\HttpRequest.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Request.HttpRequestBody" Collapsed="true">
     <Position X="23.25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\Http\Request\HttpRequestBody.cs</FileName>
+      <FileName>Http\Request\HttpRequestBody.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Request.HttpRequestHeader" Collapsed="true">
     <Position X="25" Y="2.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAABEAAEAAACAAAAAABgAAAAAAQgAIAgCAAAAAQAAAA=</HashCode>
-      <FileName>ClientServer\Http\Request\HttpRequestHeader.cs</FileName>
+      <HashCode>AAABEAAEAAACAAAAAABgAAAAAAAgAIAgCAAAAAQAAAA=</HashCode>
+      <FileName>Http\Request\HttpRequestHeader.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Response.HttpResponse" Collapsed="true">
     <Position X="18" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>BAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\Http\Response\HttpResponse.cs</FileName>
+      <FileName>Http\Response\HttpResponse.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Response.HttpResponseBody" Collapsed="true">
     <Position X="19.75" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAhAAAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\Http\Response\HttpResponseBody.cs</FileName>
+      <FileName>Http\Response\HttpResponseBody.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.Response.HttpResponseHeader" Collapsed="true">
     <Position X="21.5" Y="3.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAAAIAAAAAAAAAAAAAAFAAAAIAAAAACAAAA=</HashCode>
-      <FileName>ClientServer\Http\Response\HttpResponseHeader.cs</FileName>
+      <FileName>Http\Response\HttpResponseHeader.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.HttpParser" Collapsed="true">
     <Position X="6.25" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAECAAgAAAAAAACAAAAAAAAAABAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\Http\HttpParser.cs</FileName>
+      <FileName>Http\HttpParser.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.RequestHandler" Collapsed="true">
     <Position X="23.25" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAARAEABAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>ClientServer\RequestHandler.cs</FileName>
+      <FileName>Server\RequestHandler.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.ClientServer.Server" Collapsed="true">
+  <Class Name="MonsterTradingCardsGame.Server.Server" Collapsed="true">
     <Position X="6.25" Y="5.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAAAAAACCAAAAAIABAAAACACAAAAAAAAAAAAAAEAAA=</HashCode>
-      <FileName>ClientServer\Server.cs</FileName>
+      <FileName>Server\Server.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbCards" Collapsed="true">
@@ -154,17 +154,10 @@
       <FileName>DbConn\DbCommands.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Router" Collapsed="true">
-    <Position X="25" Y="4.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AQQFACEAAEAAAAAiYUAARIACCAAAAAACkQCAAgIAAAU=</HashCode>
-      <FileName>DbConn\DbConnRouter.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="MonsterTradingCardsGame.DbConn.DbHandler" Collapsed="true">
     <Position X="11" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAQAAAAQAAAAAAACAgAQAAABAAAQA=</HashCode>
+      <HashCode>AAAAgAAAAAAAAAAAQAAAAQAAAAAAACAgAQAAABAAAQA=</HashCode>
       <FileName>DbConn\DbHandler.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -182,32 +175,11 @@
       <FileName>ParseJSON\JSON.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.StoreNamespace.Package" Collapsed="true">
-    <Position X="18" Y="4.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AgAAACAAAQAAABAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>StoreNamespace\Package.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="MonsterTradingCardsGame.StoreNamespace.StoreManagement" Collapsed="true">
-    <Position X="19.75" Y="5.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
-      <FileName>StoreNamespace\StoreManagement.cs</FileName>
-    </TypeIdentifier>
-  </Class>
   <Class Name="MonsterTradingCardsGame.Program" Collapsed="true">
     <Position X="19.75" Y="4.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
       <FileName>Program.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="user.User" Collapsed="true">
-    <Position X="21.5" Y="5.5" Width="1.5" />
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAABIQAAAAAA=</HashCode>
-      <FileName>User.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

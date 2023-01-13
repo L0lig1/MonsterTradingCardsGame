@@ -1,5 +1,4 @@
-﻿
-namespace MonsterTradingCardsGame.ClientServer.Http.Response
+﻿namespace MonsterTradingCardsGame.ClientServer.Http.Response
 {
     public class HttpResponseBody
     {

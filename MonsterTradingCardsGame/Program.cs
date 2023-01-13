@@ -1,17 +1,15 @@
-﻿using MonsterTradingCardsGame.ClientServer;
-using MonsterTradingCardsGame.DbConn;
-using MonsterTradingCardsGame.DbConn.Tables;
+﻿using MonsterTradingCardsGame.DbConn;
 
 
 namespace MonsterTradingCardsGame
 {
     internal class Program
     {
-        public static void Main(String[] args)
+        public static void Main()
         {
-            var db = new Router();
+            var db = new Db();
             db.TruncateAll();
-            var server = new Server();
+            var server = new Server.Server();
             server.Start();
         }
     }

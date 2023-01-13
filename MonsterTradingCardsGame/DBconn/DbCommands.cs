@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 
 namespace MonsterTradingCardsGame.DbConn
 {
@@ -87,8 +83,8 @@ namespace MonsterTradingCardsGame.DbConn
 
             /* Stack */
             { 
-                "AddCardToStack", "INSERT INTO public.stack(username, card_id, amount) " +
-                                                    "VALUES(@user, @card, 1)"
+                "AddCardToStack", "INSERT INTO public.stack(username, card_id, amount, deck, locked_for_trade) " +
+                                                    "VALUES(@user, @card, 1, false, false)"
             },
             { 
                 "ShowStack", "SELECT cards.name " +
@@ -96,10 +92,17 @@ namespace MonsterTradingCardsGame.DbConn
                              "WHERE stack.username = @user "
             },
             {
-                "GetCardFromStackById", "SELECT username, cardtype, damage, amount " +
+                "GetCardFromStackById", "SELECT name " +
                                         "FROM stack JOIN cards ON cards.c_id = stack.card_id " +
                                         "WHERE stack.username = @user " +
-                                          "AND cards.c_id = @card "
+                                          "AND cards.c_id = @card " +
+                                          "AND stack.locked_for_trade != true"
+            },
+            {
+                "GetCardAllFromStackById", "SELECT username, cardtype, damage, amount " +
+                                           "FROM stack JOIN cards ON cards.c_id = stack.card_id " +
+                                           "WHERE stack.username = @user " +
+                                             "AND cards.c_id = @card "
             },
             { 
                 "AddCardToStackDuplicate", "Update stack " +
@@ -134,12 +137,12 @@ namespace MonsterTradingCardsGame.DbConn
                 "GetDeckOnlyCardName", "SELECT cards.name "+
                                        "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
                                        "WHERE username = @user " +
-                                        "AND deck = true"
+                                         "AND deck = true"
             },
             {
                 "GetDeck", "SELECT cards.c_id, name, damage, elemtype, cardtype " +
-                            "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
-                            "WHERE username = @user " +
+                           "FROM stack JOIN cards ON stack.card_id = cards.c_id " +
+                           "WHERE username = @user " +
                              "AND deck = true"
             },
             { 

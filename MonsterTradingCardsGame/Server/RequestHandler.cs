@@ -2,6 +2,7 @@
 using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.DbConn;
+using MonsterTradingCardsGame.Server;
 
 
 namespace MonsterTradingCardsGame.ClientServer
@@ -31,15 +32,12 @@ namespace MonsterTradingCardsGame.ClientServer
                         return _router.CreateHttpResponse(HttpStatusCode.Unauthorized, "Unauthorized");
                     }
                 }
-                _router.Connect();
                 Response = _router.Route(splitUrl[1], request, _authHandler);
-                _router.Disconnect();
 
                 return Response;
             }
             catch (Exception e)
             {
-                _router.Disconnect();
                 return _router.CreateHttpResponse(HttpStatusCode.Conflict, $"Error: {e.Message}");
             }
         }

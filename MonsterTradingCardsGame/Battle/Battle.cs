@@ -1,11 +1,11 @@
 ﻿using MonsterTradingCardsGame.CardNamespace;
 using MonsterTradingCardsGame.LogsManagement;
-using user;
+using MonsterTradingCardsGame.Users;
 
 
 namespace MonsterTradingCardsGame.Battle
 {
-    class Battle
+    public class Battle
     {
         private int _round = 1;
         private readonly User _user1;
@@ -111,6 +111,7 @@ namespace MonsterTradingCardsGame.Battle
             var U2Elo = _calc.CalculateEloRating(_user2.Elo, _user1.Elo, _user2.Deck.Count == 0 ? 0 : (_user1.Deck.Count == 0 ? 1 : 0.5));
             return (_log.GetLog(), U1Elo, U2Elo);
         }
+
     }
 
 }

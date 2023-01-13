@@ -4,6 +4,6 @@
     {
         public HttpRequestHeader Header = null!;
         public HttpRequestBody? Body;
-        
+        public bool IsValid;
     }
 }

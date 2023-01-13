@@ -1,10 +1,10 @@
-MonsterTradingCardsGame
+### MonsterTradingCardsGame
 
 TODO:
-- Unit Tests
+- DONE DONE Unit Tests
 - General checkup
 - DONE DONE Mandatory feature: Ban after 3 tries
-- Handling vereinheitlichen:
+- DONE DONE Handling vereinheitlichen:
     DONE DONE SELECT multirow 
     DONE DONE SELECT 1 row
     DONE DONE NonQuery  
@@ -31,9 +31,6 @@ TODO:
         DONE DONE User info bekommen
         DONE DONE Battle starten und response zurückgeben
         DONE DONE ELO nachm battle
-        ---- schau manchmal funktionierts nd
-        ---- schau rückgabe 2 thread
-        ---- Deck nach dem Spiel an das Gewinner geben
     Trade:
         DONE DONE Trade (stack funktionen myb in DbStack?)
         DONE DONE check trading deals

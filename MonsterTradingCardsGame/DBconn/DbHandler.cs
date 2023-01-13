@@ -7,7 +7,9 @@ namespace MonsterTradingCardsGame.DbConn
 {
     public class DbHandler
     {
+        protected readonly Db _db = new();
         public DbCommands Sql = new();
+
         public static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
         {
             return new HttpResponse
@@ -29,9 +31,11 @@ namespace MonsterTradingCardsGame.DbConn
             }
         }
             
-        public bool ExecNonQuery(string cmd, string[,]? values, NpgsqlConnection conn)
+        public bool ExecNonQuery(string cmd, string[,]? values)
         {
-            using var command = new NpgsqlCommand(cmd, conn);
+            _db.Connect();
+            if (_db.Conn == null) throw new Exception("Could not connect to DB");
+            using var command = new NpgsqlCommand(cmd, _db.Conn);
             if(values != null) AddParamWithValue(command, values);
             try
             {
@@ -42,12 +46,13 @@ namespace MonsterTradingCardsGame.DbConn
                 //    throw new Exception("Error: Query not successful");
                 //}
                 //return CreateHttpResponse(HttpStatusCode.OK, "Could not create package!");
-
+                _db.Disconnect();
                 return true;
 
             }
             catch (Exception e)
             {
+                _db.Disconnect();
                 throw new Exception(e.Message); // CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
             }
         }
@@ -102,9 +107,11 @@ namespace MonsterTradingCardsGame.DbConn
             return resp;
         }
 
-        public (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, NpgsqlConnection conn, bool recvResp)
+        public (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, bool recvResp)
         {
-            using var command = new NpgsqlCommand(cmd, conn);
+            _db.Connect();
+            if (_db.Conn == null) throw new Exception("Could not connect to DB");
+            using var command = new NpgsqlCommand(cmd, _db.Conn);
             if (values != null) AddParamWithValue(command, values);
             try
             {
@@ -112,21 +119,25 @@ namespace MonsterTradingCardsGame.DbConn
                 if (reader.HasRows)
                 {
                     command.Parameters.Clear();
-                    return (true, recvResp 
-                        ? (cmd.Contains("SELECT * FROM users") 
+                    var resp = (true, recvResp 
+                        ? cmd.Contains("SELECT * FROM users") 
                             ? GetUserByIdResponse(reader) 
-                            : GetQueryResponse(returnColumnSize, intIndexes, reader)) 
+                            : GetQueryResponse(returnColumnSize, intIndexes, reader) 
                         : "");
+                    _db.Disconnect();
+                    return resp;
                 }
 
                 command.Parameters.Clear();
                 reader.Close();
+                _db.Disconnect();
                 return (false, "No results found");
 
             }
             catch (Exception e)
             {
-                return (false, "Query Failed! " + e.Message); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
+                _db.Disconnect();
+                return (false, $"Query Failed! {e.Message}"); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
             }
         }
 

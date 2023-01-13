@@ -2,7 +2,7 @@
 {
     public class HttpResponse
     {
-        public HttpResponseHeader Header;
+        public HttpResponseHeader Header = null!;
         public HttpResponseBody? Body;
         
     }

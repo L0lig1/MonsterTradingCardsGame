@@ -1,6 +1,4 @@
-﻿
-
-namespace MonsterTradingCardsGame.CardNamespace
+﻿namespace MonsterTradingCardsGame.CardNamespace
 {
     public class Card
     {
@@ -9,7 +7,7 @@ namespace MonsterTradingCardsGame.CardNamespace
             Id = id;
             Name = name;
             Damage = damage;
-            ElementType = elementType; //ValidElementTypes[rnd.Next(0, 3)];
+            ElementType = elementType;
             CardType = cardType;
         }
 
@@ -69,5 +67,6 @@ namespace MonsterTradingCardsGame.CardNamespace
         {
             return $"{Name} ({Damage}) ({CardType}) ({ElementType})";
         }
+
     }
 }
