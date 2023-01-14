@@ -41,12 +41,11 @@ namespace MonsterTradingCardsGame.DbConn
             try
             {
                 var worked = command.ExecuteNonQuery();
-                // CHECK THIS
-                //if (worked <= 0)
-                //{
-                //    throw new Exception("Error: Query not successful");
-                //}
-                //return CreateHttpResponse(HttpStatusCode.OK, "Could not create package!");
+                // For some SQL Statements worked < 0 even though it worked, did not have time to find a solution (e.g.: Create all tables)
+                // if (worked < 0)
+                // {
+                //     throw new Exception("Error: Query not successful");
+                // }
                 _db.Disconnect();
                 return true;
 
@@ -55,6 +54,40 @@ namespace MonsterTradingCardsGame.DbConn
             {
                 _db.Disconnect();
                 throw new Exception(e.Message); // CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
+            }
+        }
+
+        public virtual (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, bool recvResp)
+        {
+            _db.Connect();
+            if (_db.Conn == null) throw new Exception("Could not connect to DB");
+            using var command = new NpgsqlCommand(cmd, _db.Conn);
+            if (values != null) AddParamWithValue(command, values);
+            try
+            {
+                var reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    command.Parameters.Clear();
+                    var resp = (true, recvResp 
+                        ? cmd.Contains("SELECT * FROM users") 
+                            ? GetUserByIdResponse(reader) 
+                            : GetQueryResponse(returnColumnSize, intIndexes, reader) 
+                        : "");
+                    _db.Disconnect();
+                    return resp;
+                }
+
+                command.Parameters.Clear();
+                reader.Close();
+                _db.Disconnect();
+                return (false, "No results found");
+
+            }
+            catch (Exception e)
+            {
+                _db.Disconnect();
+                return (false, $"Query Failed! {e.Message}"); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
             }
         }
 
@@ -108,39 +141,6 @@ namespace MonsterTradingCardsGame.DbConn
             return resp;
         }
 
-        public virtual (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, bool recvResp)
-        {
-            _db.Connect();
-            if (_db.Conn == null) throw new Exception("Could not connect to DB");
-            using var command = new NpgsqlCommand(cmd, _db.Conn);
-            if (values != null) AddParamWithValue(command, values);
-            try
-            {
-                var reader = command.ExecuteReader();
-                if (reader.HasRows)
-                {
-                    command.Parameters.Clear();
-                    var resp = (true, recvResp 
-                        ? cmd.Contains("SELECT * FROM users") 
-                            ? GetUserByIdResponse(reader) 
-                            : GetQueryResponse(returnColumnSize, intIndexes, reader) 
-                        : "");
-                    _db.Disconnect();
-                    return resp;
-                }
-
-                command.Parameters.Clear();
-                reader.Close();
-                _db.Disconnect();
-                return (false, "No results found");
-
-            }
-            catch (Exception e)
-            {
-                _db.Disconnect();
-                return (false, $"Query Failed! {e.Message}"); //CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
-            }
-        }
 
     }
 }

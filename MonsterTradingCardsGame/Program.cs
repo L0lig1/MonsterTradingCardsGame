@@ -5,10 +5,10 @@ namespace MonsterTradingCardsGame
 {
     internal class Program
     {
+
         public static void Main()
         {
-            var db = new Db();
-            db.TruncateAll();
+            if (!new DbHandler().ExecNonQuery(new DbCommands().Commands["CreateAllTablesIfNotExists"], null)) return;
             var server = new Server.Server();
             server.Start();
         }

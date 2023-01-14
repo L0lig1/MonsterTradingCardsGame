@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using MonsterTradingCardsGame.DbConn.Tables;
 using NUnit.Framework;
-using MonsterTradingCardsGame.DbConn.Tables;
+using System.Linq;
 
 
 namespace MonsterTradingCardsGameTesting.Unit_Tests

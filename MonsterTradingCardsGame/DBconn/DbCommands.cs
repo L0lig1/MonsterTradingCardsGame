@@ -209,6 +209,76 @@ namespace MonsterTradingCardsGame.DbConn
                 "DeleteTradingDeal", "DELETE " +
                                      "FROM public.trading " +
                                      "WHERE trade_id = @tid;"
+            },
+
+
+            {
+                "CreateAllTablesIfNotExists",
+                // Cards
+                "CREATE TABLE IF NOT EXISTS public.cards " +
+                "( " +
+                    "name character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "damage integer, "+
+                    "cardtype character varying COLLATE pg_catalog.\"default\", "+
+                    "elemtype character varying COLLATE pg_catalog.\"default\", "+
+                    "c_id character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "CONSTRAINT cards_pkey PRIMARY KEY(c_id) "+
+                ") " +
+                "TABLESPACE pg_default; " +
+                "ALTER TABLE IF EXISTS public.cards " +
+                    "OWNER to postgres; " +
+                // Packages
+                "CREATE TABLE IF NOT EXISTS public.packages " +
+                "( " +
+                    "p_id character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "card_id character varying COLLATE pg_catalog.\"default\" NOT NULL "+
+                ") "+
+                "TABLESPACE pg_default; "+
+                "ALTER TABLE IF EXISTS public.packages "+
+                "OWNER to postgres; "+
+                // Stack
+                "CREATE TABLE IF NOT EXISTS public.stack "+
+                "( "+
+                    "username character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "card_id character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "amount integer NOT NULL, "+
+                    "deck boolean, "+
+                    "locked_for_trade boolean, "+
+                    "CONSTRAINT f UNIQUE(username, card_id) "+
+                ") " +
+                "TABLESPACE pg_default; " +
+                "ALTER TABLE IF EXISTS public.stack " +
+                    "OWNER to postgres; " +
+                // Trading
+                "CREATE TABLE IF NOT EXISTS public.trading " +
+                "( " +
+                    "trade_id character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "cardtotrade character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "cardtype character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "username character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "mindmg integer NOT NULL, "+
+                    "CONSTRAINT trading_pkey PRIMARY KEY(trade_id) "+
+                ") "+
+                "TABLESPACE pg_default; "+
+                "ALTER TABLE IF EXISTS public.trading "+
+                    "OWNER to postgres; " +
+                // Users
+                "CREATE TABLE IF NOT EXISTS public.users " +
+                "( " +
+                    "username character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "pw character varying COLLATE pg_catalog.\"default\" NOT NULL, "+
+                    "coins integer, "+
+                    "elo integer DEFAULT 100, "+
+                    "bio character varying COLLATE pg_catalog.\"default\", "+
+                    "image character varying COLLATE pg_catalog.\"default\", "+
+                    "second_na"+
+                    "me character varying COLLATE pg_catalog.\"default\", "+
+                    "CONSTRAINT u_prim PRIMARY KEY(username), "+
+                    "CONSTRAINT deez UNIQUE(username) "+
+                ") "+
+                "TABLESPACE pg_default; "+
+                "ALTER TABLE IF EXISTS public.users "+
+                "OWNER to postgres; "
             }
 
         };
