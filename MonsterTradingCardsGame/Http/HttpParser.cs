@@ -1,7 +1,5 @@
-﻿using System.Net.Mime;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using MonsterTradingCardsGame.ClientServer.Http.Request;
-using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 
 namespace MonsterTradingCardsGame.ClientServer.Http

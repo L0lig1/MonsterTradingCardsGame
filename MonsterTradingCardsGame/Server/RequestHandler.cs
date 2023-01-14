@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
-using MonsterTradingCardsGame.DbConn;
-using MonsterTradingCardsGame.Server;
 
 
-namespace MonsterTradingCardsGame.ClientServer
+namespace MonsterTradingCardsGame.Server
 {
     internal class RequestHandler
     {
@@ -13,7 +11,7 @@ namespace MonsterTradingCardsGame.ClientServer
         public HttpResponse Response = new();
         private AuthorizationHandler _authHandler = new();
 
-        public HttpResponse HandleRequest(Http.Request.HttpRequest? request, AuthorizationHandler authorization)
+        public HttpResponse HandleRequest(ClientServer.Http.Request.HttpRequest? request, AuthorizationHandler authorization)
         {
             _authHandler = authorization;
             try
