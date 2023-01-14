@@ -85,7 +85,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.ClientServer.Http.HttpParser" Collapsed="true">
-    <Position X="6.25" Y="4.5" Width="1.5" />
+    <Position X="3.25" Y="9.75" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAECAAgAAAAAAACAAAAAAAAAABAAAAAAAAAAA=</HashCode>
       <FileName>Http\HttpParser.cs</FileName>
@@ -99,42 +99,42 @@
     </TypeIdentifier>
   </Class>
   <Class Name="MonsterTradingCardsGame.Server.Server" Collapsed="true">
-    <Position X="6.25" Y="5.75" Width="1.5" />
+    <Position X="3.25" Y="11" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AgAAAAAACCAAAAAIABAAAACACAAAAAAAAAAAAAAEAAA=</HashCode>
       <FileName>Server\Server.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbCards" Collapsed="true">
-    <Position X="15.5" Y="2.75" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbCards">
+    <Position X="12.75" Y="7" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAQAA=</HashCode>
       <FileName>DbConn\Tables\DbCards.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbPackages" Collapsed="true">
-    <Position X="6.5" Y="2.75" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbPackages">
+    <Position X="3.25" Y="7" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAABAAAAAQAAQAAAAAAAAAAAAAAABAAAAAAAABAgA=</HashCode>
       <FileName>DbConn\Tables\DbPackages.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbStack" Collapsed="true">
-    <Position X="8.75" Y="2.75" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbStack">
+    <Position X="5.75" Y="7" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAQAAIAACEAAAEBAAAAAAAAAAAAAA=</HashCode>
       <FileName>DbConn\Tables\DbStack.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbTradings" Collapsed="true">
-    <Position X="11" Y="2.75" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbTradings">
+    <Position X="8.25" Y="7" Width="1.5" />
     <TypeIdentifier>
       <HashCode>ARAAAAAAAAAAAAAAAAAAAAIAAAAAACIAAAAIAAAAAAA=</HashCode>
       <FileName>DbConn\Tables\DbTradings.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbUsers" Collapsed="true">
-    <Position X="13.25" Y="2.75" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.Tables.DbUsers">
+    <Position X="10.5" Y="7" Width="1.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAIAAAggAABAAAAAAEAAQCAAAAAAAAAAAAAAAE=</HashCode>
       <FileName>DbConn\Tables\DbUsers.cs</FileName>
@@ -154,8 +154,8 @@
       <FileName>DbConn\DbCommands.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="MonsterTradingCardsGame.DbConn.DbHandler" Collapsed="true">
-    <Position X="11" Y="1.5" Width="1.5" />
+  <Class Name="MonsterTradingCardsGame.DbConn.DbHandler">
+    <Position X="8" Y="0.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAgAAAAAAAAAAAQAAAAQAAAAAAACAgAQAAABAAAQA=</HashCode>
       <FileName>DbConn\DbHandler.cs</FileName>

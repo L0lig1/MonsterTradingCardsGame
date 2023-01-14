@@ -3,13 +3,13 @@ using Npgsql;
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
-    public class DbCards : DbHandler
+    public class DbCards
     {
-        public bool CreateCard(string id, string name, int dmg)
+        public bool CreateCard(string id, string name, int dmg, DbHandler dbHandler)
         {
             try
             {
-                return ExecNonQuery(Sql.Commands["CreateCard"], 
+                return dbHandler.ExecNonQuery(dbHandler.Sql.Commands["CreateCard"], 
                     new[,]{ 
                         { "name", name }, 
                         { "dmg", dmg.ToString() }, 
@@ -36,8 +36,8 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             foreach (var type in new CardTypes().ValidElementTypes)
             {
                 name = name.ToLower();
-                if (name.Contains("Regular")) return "Normal";
-                if (name.Contains(type)) return type;
+                if (name.Contains("regular")) return "Normal";
+                if (name.Contains(type.ToLower())) return type;
             }
 
             return new CardTypes().ValidElementTypes[new Random().Next(0, 3)];

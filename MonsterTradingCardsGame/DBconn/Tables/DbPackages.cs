@@ -4,16 +4,16 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
-    public class DbPackages : DbHandler
+    public class DbPackages
     {
 
         private readonly DbCards _dbCards = new();
 
-        public bool DeletePackage(string pId)
+        public bool DeletePackage(string pId, DbHandler dbHandler)
         {
             try
             {
-                return ExecNonQuery(Sql.Commands["DeletePackage"], new string[,]{{"p_id", pId}}) ? true : throw new Exception();
+                return dbHandler.ExecNonQuery(dbHandler.Sql.Commands["DeletePackage"], new string[,]{{"p_id", pId}}) ? true : throw new Exception();
             }
             catch (Exception e)
             {
@@ -22,11 +22,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public string SelectRandomPackageId()
+        public string SelectRandomPackageId(DbHandler dbHandler)
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["SelectRandomPackageId"], 1, null, null, true);
+                var resp = dbHandler.ExecQuery(dbHandler.Sql.Commands["SelectRandomPackageId"], 1, null, null, true);
                 return resp.Item1
                     ? resp.Item2
                     : throw new Exception("There are no packages in the store");
@@ -37,12 +37,12 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             }
         }
 
-        public string[] GetPackageByRandId()
+        public string[] GetPackageByRandId(DbHandler dbHandler)
         {
             try
             {
-                var pId = SelectRandomPackageId();
-                var resp = ExecQuery(Sql.Commands["GetPackage"], 2, null, new string[,]{{"p_id", pId } }, true);
+                var pId = SelectRandomPackageId(dbHandler);
+                var resp = dbHandler.ExecQuery(dbHandler.Sql.Commands["GetPackage"], 2, null, new string[,]{{"p_id", pId } }, true);
                 return resp.Item1
                     ? resp.Item2.Split(Environment.NewLine)
                     : throw new Exception("Could not get packages!");
@@ -68,7 +68,7 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             return new string(stringChars);
         }
 
-        public HttpResponse CreatePackage(dynamic cards)
+        public HttpResponse CreatePackage(dynamic cards, DbHandler dbHandler)
         {
             var packageId = GetRandomString();
 
@@ -76,11 +76,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             {
                 try
                 {
-                    if (!ExecNonQuery(Sql.Commands["CreatePackage"], new string[,] { { "p_id", packageId }, { "c_id", card.Id.ToString() } }))
+                    if (!dbHandler.ExecNonQuery(dbHandler.Sql.Commands["CreatePackage"], new string[,] { { "p_id", packageId }, { "c_id", card.Id.ToString() } }))
                     {
                         throw new Exception("Didn't work");
                     }
-                    _dbCards.CreateCard(card.Id.ToString(), card.Name.ToString(), (int)card.Damage);
+                    _dbCards.CreateCard(card.Id.ToString(), card.Name.ToString(), (int)card.Damage, dbHandler);
                 }
                 catch (Exception e)
                 {
@@ -88,11 +88,11 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                     if (e.Message.Split(':')[0] == "23505")
                         throw new Exception("Package already exists");
 
-                    return CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
+                    return dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, "Could not create package!");
                 }
             }
 
-            return CreateHttpResponse(HttpStatusCode.Created, "Package created!");
+            return dbHandler.CreateHttpResponse(HttpStatusCode.Created, "Package created!");
         }
 
     }

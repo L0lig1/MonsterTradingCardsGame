@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using MonsterTradingCardsGame.DbConn;
 using MonsterTradingCardsGame.DbConn.Tables;
 using MonsterTradingCardsGame.Users;
 
@@ -15,13 +16,14 @@ namespace MonsterTradingCardsGame.Battle
         private dynamic? _celo1 = 0, _celo2 = 0;
         private (string, int, int) _battleLog;
         private readonly ConcurrentDictionary<string, string> _gameResults = new();
+        private DbHandler _handler = new();
 
         private void PlayGame()
         {
             Console.WriteLine("Game starting!");
             var battle = new Battle(
-                new User(_users[0], _dbStack.GetDeck(_users[0]), _celo1),
-                new User(_users[1], _dbStack.GetDeck(_users[1]), _celo2)
+                new User(_users[0], _dbStack.GetDeck(_users[0], _handler), _celo1),
+                new User(_users[1], _dbStack.GetDeck(_users[1], _handler), _celo2)
             );
             _battleLog = battle.Fight();
             Console.WriteLine(_battleLog.Item1 + Environment.NewLine + _battleLog.Item2 + Environment.NewLine + _battleLog.Item3);
@@ -29,7 +31,7 @@ namespace MonsterTradingCardsGame.Battle
 
         private void BattleResult(string username, int elo)
         {
-            _dbUser.UpdateUserStats(username, elo);
+            _dbUser.UpdateUserStats(username, elo, _handler);
             _gameResults.TryAdd(username, _battleLog.Item1);
         }
 
@@ -42,7 +44,7 @@ namespace MonsterTradingCardsGame.Battle
                     _users.Add(username);
                     if (!OnePlayerJoined)
                     {
-                        _celo1 = int.Parse(_dbUser.UserStats(username).Body?.Data);
+                        _celo1 = int.Parse(_dbUser.UserStats(username, _handler).Body?.Data);
                         OnePlayerJoined = true;
                         Monitor.Wait(_lockFlag);
                         if (_gameResults.ContainsKey(_users[0]))
@@ -53,7 +55,7 @@ namespace MonsterTradingCardsGame.Battle
                     {
                         // Both players have joined, start the game!
 
-                        _celo2 = int.Parse(_dbUser.UserStats(username).Body?.Data);
+                        _celo2 = int.Parse(_dbUser.UserStats(username, _handler).Body?.Data);
 
                         PlayGame();
                         BattleResult(_users[0], _battleLog.Item2);

@@ -4,7 +4,7 @@ using MonsterTradingCardsGame.ClientServer.Http.Response;
 
 namespace MonsterTradingCardsGame.DbConn.Tables
 {
-    public class DbTradings : DbHandler
+    public class DbTradings
     {
         private readonly DbStack _dbStack = new();
         private static string ParseTradingDeal(string td)
@@ -21,57 +21,57 @@ namespace MonsterTradingCardsGame.DbConn.Tables
             return resp;
         }
 
-        public HttpResponse GetTradingDeals()
+        public HttpResponse GetTradingDeals(DbHandler dbHandler)
         {
             try
             {
-                var resp = ExecQuery(Sql.Commands["GetTradingDeals"], 5,new []{4}, null, true);
+                var resp = dbHandler.ExecQuery(dbHandler.Sql.Commands["GetTradingDeals"], 5,new []{4}, null, true);
                 return resp.Item1
-                    ? CreateHttpResponse(HttpStatusCode.OK, ParseTradingDeal(resp.Item2))
+                    ? dbHandler.CreateHttpResponse(HttpStatusCode.OK, ParseTradingDeal(resp.Item2))
                     : throw new Exception("There are no deals currently!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "Problem while retrieving trading deals: " + e.Message);
+                return dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, "Problem while retrieving trading deals: " + e.Message);
             }
         }
 
-        public HttpResponse CreateTradingDeal(string user, dynamic bodyData)
+        public HttpResponse CreateTradingDeal(string user, dynamic bodyData, DbHandler dbHandler)
         {
             try
             {
-                ExecNonQuery(Sql.Commands["LockCardForTrade"], new string[,] { { "user", user }, { "card", bodyData.CardToTrade } });
-                return ExecNonQuery(
-                    Sql.Commands["CreateTradingDeal"],
+                dbHandler.ExecNonQuery(dbHandler.Sql.Commands["LockCardForTrade"], new string[,] { { "user", user }, { "card", bodyData.CardToTrade } });
+                return dbHandler.ExecNonQuery(
+                    dbHandler.Sql.Commands["CreateTradingDeal"],
                     new string[,]
                     {
                         { "tid", bodyData.Id }, { "ctt", bodyData.CardToTrade }, { "ct", bodyData.Type },
                         { "dmg", bodyData.MinimumDamage.ToString() }, { "user", user }
                     }
                 )
-                    ? CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Created successfully")
-                    : CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while creating trading deal");
+                    ? dbHandler.CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Created successfully")
+                    : dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while creating trading deal");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, "Trade deal could not be created because: " + e.Message);
+                return dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, "Trade deal could not be created because: " + e.Message);
             }
         }
 
-        public HttpResponse DeleteTradingDeal(string tId)
+        public HttpResponse DeleteTradingDeal(string tId, DbHandler dbHandler)
         {
-            return ExecNonQuery(Sql.Commands["DeleteTradingDeal"], new [,]{ { "tid", tId } })
-                ? CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Deleted successfully")
-                : CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while deleting trading deal");
+            return dbHandler.ExecNonQuery(dbHandler.Sql.Commands["DeleteTradingDeal"], new [,]{ { "tid", tId } })
+                ? dbHandler.CreateHttpResponse(HttpStatusCode.Created, "Trading Deal Deleted successfully")
+                : dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, "Conflict while deleting trading deal");
         }
 
-        public HttpResponse Trade(string tradeId, string t2CardToTrade, string t2User)
+        public HttpResponse Trade(string tradeId, string t2CardToTrade, string t2User, DbHandler dbHandler)
         {
             try
             {
                 // get trading deal (if exists)
-                var tradee1  = ExecQuery(
-                    Sql.Commands["GetTradingDealById"], 
+                var tradee1  = dbHandler.ExecQuery(
+                    dbHandler.Sql.Commands["GetTradingDealById"], 
                     5, 
                     new[] {2,3},
                     new[,] { { "tid", tradeId } },
@@ -79,8 +79,8 @@ namespace MonsterTradingCardsGame.DbConn.Tables
                 );
                 
                 // get cardToTrade (if exists)
-                var tradee2 = ExecQuery(
-                    Sql.Commands["GetCardAllFromStackById"], 
+                var tradee2 = dbHandler.ExecQuery(
+                    dbHandler.Sql.Commands["GetCardAllFromStackById"], 
                     4, 
                     new []{2,3},
                     new [,]{{"user", t2User}, {"card", t2CardToTrade}},
@@ -116,21 +116,21 @@ namespace MonsterTradingCardsGame.DbConn.Tables
 
                 // if successful
                 // amount == 1 ? DELETE delete card from stack : amount - 1
-                _dbStack.RemoveCardFromStackById(trade1Split[4], trade1Split[0], int.Parse(trade1Split[3]));
-                _dbStack.RemoveCardFromStackById(t2CardToTrade, t2User, int.Parse(trade2Split[3]));
+                _dbStack.RemoveCardFromStackById(trade1Split[4], trade1Split[0], int.Parse(trade1Split[3]), dbHandler);
+                _dbStack.RemoveCardFromStackById(t2CardToTrade, t2User, int.Parse(trade2Split[3]), dbHandler);
 
                 // add each card to each stack
-                _dbStack.AddCardToStack(trade1Split[0], t2CardToTrade);
-                _dbStack.AddCardToStack(t2User, trade1Split[4]);
+                _dbStack.AddCardToStack(trade1Split[0], t2CardToTrade, dbHandler);
+                _dbStack.AddCardToStack(t2User, trade1Split[4], dbHandler);
 
                 // delete Trading deal
-                DeleteTradingDeal(tradeId);
+                DeleteTradingDeal(tradeId, dbHandler);
 
-                return CreateHttpResponse(HttpStatusCode.OK, "Trade successful!");
+                return dbHandler.CreateHttpResponse(HttpStatusCode.OK, "Trade successful!");
             }
             catch (Exception e)
             {
-                return CreateHttpResponse(HttpStatusCode.Conflict, $"Trade unsuccessful because of the following error: {Environment.NewLine}{e.Message}" );
+                return dbHandler.CreateHttpResponse(HttpStatusCode.Conflict, $"Trade unsuccessful because of the following error: {Environment.NewLine}{e.Message}" );
             }
         }
 

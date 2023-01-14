@@ -4,6 +4,7 @@ using MonsterTradingCardsGame.Authorization;
 using MonsterTradingCardsGame.DbConn.Tables;
 using MonsterTradingCardsGame.ClientServer.Http.Request;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
+using MonsterTradingCardsGame.DbConn;
 
 namespace MonsterTradingCardsGame.Server
 {
@@ -14,6 +15,7 @@ namespace MonsterTradingCardsGame.Server
         private readonly DbTradings _dbTradings = new();
         private readonly DbStack _dbStack = new();
         private readonly BattleLobby _game = new();
+        private DbHandler _dbHandler = new();
 
         public HttpResponse Route(string url, HttpRequest request, AuthorizationHandler authHandler)
         {
@@ -53,11 +55,11 @@ namespace MonsterTradingCardsGame.Server
                 return request.Header.Method switch
                 {
                     "POST" when splitUrl.Length == 2 && request.Body != null && request.Body.Data != null =>
-                        _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString()),
+                        _dbUser.RegisterUser(request.Body?.Data?.Username.ToString(), request.Body?.Data?.Password.ToString(), _dbHandler),
                     "PUT" when splitUrl.Length > 2 && request.Body != null && request.Body.Data != null =>
-                        _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString()),
+                        _dbUser.UpdateUser(splitUrl[2], request.Body?.Data?.Name.ToString(), request.Body?.Data?.Bio.ToString(), request.Body?.Data?.Image.ToString(), _dbHandler),
                     "GET" when splitUrl.Length > 2 && request.Body != null && request.Body.Data == null =>
-                        _dbUser.GetUserById(splitUrl[2],request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException()),
+                        _dbUser.GetUserById(splitUrl[2],request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), _dbHandler),
                     _ => throw new Exception("Invalid request!")
                 };
             }
@@ -71,7 +73,7 @@ namespace MonsterTradingCardsGame.Server
         public HttpResponse SessionRoute(HttpRequest request, AuthorizationHandler authHandler)
         {
             var username = request.Body?.Data?.Username.ToString();
-            HttpResponse resp = _dbUser.LoginUser(username, request.Body?.Data?.Password.ToString());
+            HttpResponse resp = _dbUser.LoginUser(username, request.Body?.Data?.Password.ToString(), _dbHandler);
             if (authHandler._authorization.ContainsKey(username))
             {
                 authHandler._authorization[username].Tries++;
@@ -105,7 +107,7 @@ namespace MonsterTradingCardsGame.Server
                 if (request.Body?.Data != null)
                 {
                     return request.Header.AuthKey?.Split('-')[0] == "admin" 
-                        ? _dbPackages.CreatePackage(request.Body?.Data)
+                        ? _dbPackages.CreatePackage(request.Body?.Data, _dbHandler)
                         : CreateHttpResponse(HttpStatusCode.Unauthorized, "Only admins can create packages");
                 }
                 return CreateHttpResponse(HttpStatusCode.Conflict, "Could not create Package!");
@@ -125,13 +127,12 @@ namespace MonsterTradingCardsGame.Server
                 if (request.Header.Url.Split('/')[2] == "packages" && username != null)
                 {
                     // Aqcuire packages
-                    _dbUser.HasEnoughCoins(username);
+                    _dbUser.HasEnoughCoins(username, _dbHandler);
 
-                    var packages = _dbPackages.GetPackageByRandId();
+                    var packages = _dbPackages.GetPackageByRandId(_dbHandler);
                     foreach (var package in packages)
                     {
-                        var response = _dbStack.AddCardToStack(username ?? throw new InvalidOperationException(),
-                            package.Split('@')[1]);
+                        var response = _dbStack.AddCardToStack(username ?? throw new InvalidOperationException(), package.Split('@')[1], _dbHandler);
                         if (response.Header.StatusCode != HttpStatusCode.OK)
                         {
                             return response;
@@ -139,11 +140,10 @@ namespace MonsterTradingCardsGame.Server
                     }
 
 
-                    _dbPackages.DeletePackage(packages[0].Split('@')[0]);
-                    _dbUser.UseCoins(username, 5);
+                    _dbPackages.DeletePackage(packages[0].Split('@')[0], _dbHandler);
+                    _dbUser.UseCoins(username, 5, _dbHandler);
                     return CreateHttpResponse(HttpStatusCode.OK, $"Cards added to {username}'s stack!");
                 }
-
             }
 
             catch (Exception e)
@@ -158,7 +158,7 @@ namespace MonsterTradingCardsGame.Server
         {
             try
             {
-                return _dbStack.ShowStack(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException());
+                return _dbStack.ShowStack(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), _dbHandler);
 
             }
             catch (Exception e)
@@ -171,7 +171,7 @@ namespace MonsterTradingCardsGame.Server
         {
             try
             {
-                return _dbUser.UserStats(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException());
+                return _dbUser.UserStats(request.Header.AuthKey?.Split('-')[0] ?? throw new InvalidOperationException(), _dbHandler);
             }
             catch (Exception e)
             {
@@ -183,7 +183,7 @@ namespace MonsterTradingCardsGame.Server
         {
             try
             {
-                return _dbUser.Scoreboard();
+                return _dbUser.Scoreboard(_dbHandler);
             }
             catch (Exception e)
             {
@@ -199,19 +199,19 @@ namespace MonsterTradingCardsGame.Server
                 {
                     case "GET":
                         // check Trading deals
-                        return _dbTradings.GetTradingDeals();
+                        return _dbTradings.GetTradingDeals(_dbHandler);
                     case "POST":
                         if (request.Header.Url == "/tradings")
                         {
-                            return _dbTradings.CreateTradingDeal(request.Header.AuthKey?.Split('-')[0], request.Body?.Data);
+                            return _dbTradings.CreateTradingDeal(request.Header.AuthKey?.Split('-')[0], request.Body?.Data, _dbHandler);
                         }
                         // Trade (check for self trade, invalid user, invalid card)
                         var subUrl = request.Header.Url.Split('/');
                         if (subUrl.Length == 3 && request.Body != null)
-                            return _dbTradings.Trade(subUrl[2], request.Body.Data?.ToString(), request.Header.User);
+                            return _dbTradings.Trade(subUrl[2], request.Body.Data?.ToString(), request.Header.User, _dbHandler);
                         throw new Exception("Invalid request!");
                     case "DELETE":
-                        return _dbTradings.DeleteTradingDeal(request.Header.Url.Split('/')[2]);
+                        return _dbTradings.DeleteTradingDeal(request.Header.Url.Split('/')[2], _dbHandler);
                 }
 
                 throw new Exception("Invalid request!");
@@ -228,10 +228,10 @@ namespace MonsterTradingCardsGame.Server
             {
                 if (request.Body != null && request.Body.Data != null)
                 {
-                    return _dbStack.ConfigureDeck(request.Header.User, request.Body?.Data); // configure deck
+                    return _dbStack.ConfigureDeck(request.Header.User, request.Body?.Data, _dbHandler); // configure deck
                 }
 
-                if (request.Header.User != null) return _dbStack.GetDeckOnlyCardNames(request.Header.User);
+                if (request.Header.User != null) return _dbStack.GetDeckOnlyCardNames(request.Header.User, _dbHandler);
                 //Response = data.Split('?').Length == 1 ?
                 // Show Deck
                 //"akfjdsb" : "aflkds"; // Show Different representation

@@ -1,16 +1,17 @@
 ﻿using System.Net;
 using MonsterTradingCardsGame.ClientServer.Http.Response;
+using MonsterTradingCardsGame.DbConn.Tables;
 using Npgsql;
 
 
 namespace MonsterTradingCardsGame.DbConn
 {
-    public class DbHandler
+    public class DbHandler 
     {
         protected readonly Db _db = new();
         public DbCommands Sql = new();
 
-        public static HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
+        public HttpResponse CreateHttpResponse(HttpStatusCode status, string body)
         {
             return new HttpResponse
             {
@@ -31,7 +32,7 @@ namespace MonsterTradingCardsGame.DbConn
             }
         }
             
-        public bool ExecNonQuery(string cmd, string[,]? values)
+        public virtual bool ExecNonQuery(string cmd, string[,]? values)
         {
             _db.Connect();
             if (_db.Conn == null) throw new Exception("Could not connect to DB");
@@ -107,7 +108,7 @@ namespace MonsterTradingCardsGame.DbConn
             return resp;
         }
 
-        public (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, bool recvResp)
+        public virtual (bool, string) ExecQuery(string cmd, int returnColumnSize, int[]? intIndexes, string[,]? values, bool recvResp)
         {
             _db.Connect();
             if (_db.Conn == null) throw new Exception("Could not connect to DB");
