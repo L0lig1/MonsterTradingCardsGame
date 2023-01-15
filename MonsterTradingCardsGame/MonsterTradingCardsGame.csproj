@@ -8,12 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="Npgsql" Version="6.0.7" />
+    <Compile Remove="LogsManagement\BattleLogs\**" />
+    <EmbeddedResource Remove="LogsManagement\BattleLogs\**" />
+    <None Remove="LogsManagement\BattleLogs\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="LogsManagement\BattleLogs\" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Npgsql" Version="6.0.7" />
   </ItemGroup>
 
 </Project>
