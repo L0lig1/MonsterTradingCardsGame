@@ -12,7 +12,8 @@ namespace MonsterTradingCardsGame.LogsManagement
 
         public LogFileManagement()
         {
-            _fileName = @"C:\Users\Nahash\source\repos\MonsterTradingCardsGame\MonsterTradingCardsGame\LogsManagement\BattleLogs\" + DateTime.Now.ToString("yyyy-MM-dd hh-mm-ss") + ".log";
+            PATHTOCHANGE = "";
+            _fileName = $@"{PATHTOCHANGE}" + DateTime.Now.ToString("yyyy-MM-dd hh-mm-ss") + ".log";
             using var fs = File.Create(_fileName);
             var info = new UTF8Encoding(true).GetBytes($"New Battle on {DateTime.Now:yyyy-MM-dd hh:mm:ss}\n");
             // Add some information to the file.

@@ -16,7 +16,7 @@ namespace MonsterTradingCardsGame.Battle
         private dynamic? _celo1 = 0, _celo2 = 0;
         private (string, int, int) _battleLog;
         private readonly ConcurrentDictionary<string, string> _gameResults = new();
-        private DbHandler _handler = new();
+        private readonly DbHandler _handler = new();
 
         private void PlayGame()
         {
@@ -60,9 +60,7 @@ namespace MonsterTradingCardsGame.Battle
                         PlayGame();
                         BattleResult(_users[0], _battleLog.Item2);
                         BattleResult(_users[1], _battleLog.Item3);
-
-
-
+                        
                         Monitor.Pulse(_lockFlag);
                     }
                 }

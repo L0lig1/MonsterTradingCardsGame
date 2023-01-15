@@ -1,6 +1,6 @@
-﻿using System.Net;
+﻿using MonsterTradingCardsGame.ClientServer.Http.Response;
 using MonsterTradingCardsGame.Authorization;
-using MonsterTradingCardsGame.ClientServer.Http.Response;
+using System.Net;
 
 
 namespace MonsterTradingCardsGame.Server
